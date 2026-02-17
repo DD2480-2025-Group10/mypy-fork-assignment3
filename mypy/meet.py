@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import atexit
+import os
+import time
 from collections.abc import Callable
 
 from mypy import join
@@ -67,28 +69,15 @@ def _hit_is_overlapping_types(branch_id: int) -> None:
 
 def _report_is_overlapping_types_coverage() -> None:
     try:
-        existing: dict[int, int] = {}
-        try:
-            with open("is_overlapping_types_coverage.txt", encoding="utf8") as f:
-                for line in f:
-                    parts = line.strip().split()
-                    if len(parts) != 2:
-                        continue
-                    try:
-                        bid = int(parts[0])
-                        cnt = int(parts[1])
-                    except ValueError:
-                        continue
-                    existing[bid] = existing.get(bid, 0) + cnt
-        except FileNotFoundError:
-            pass
-
-        for branch_id, count in _is_overlapping_types_branch_hits.items():
-            existing[branch_id] = existing.get(branch_id, 0) + count
-
-        with open("is_overlapping_types_coverage.txt", "w", encoding="utf8") as f:
-            for branch_id in sorted(existing):
-                f.write(f"{branch_id} {existing[branch_id]}\n")
+        pid = os.getpid()
+        timestamp = int(time.time())
+        out_dir = os.path.join("is_overlapping_types_coverage", "logs")
+        os.makedirs(out_dir, exist_ok=True)
+        filename = os.path.join(out_dir, f"coverage_{pid}_{timestamp}.txt")
+        with open(filename, "w", encoding="utf8") as f:
+            for branch_id in sorted(_is_overlapping_types_branch_hits):
+                count = _is_overlapping_types_branch_hits[branch_id]
+                f.write(f"{branch_id} {count}\n")
     except Exception:
         pass
 
