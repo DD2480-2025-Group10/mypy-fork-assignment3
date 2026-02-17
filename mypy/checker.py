@@ -6450,6 +6450,8 @@ class TypeChecker(NodeVisitor[None], TypeCheckerSharedApi):
         return if_map, else_map
 
     def comparison_type_narrowing_helper(self, node: ComparisonExpr) -> tuple[TypeMap, TypeMap]:
+        from mypy.branch_coverage import record_branch
+        record_branch("comparison_type_narrowing_helper", 1)  # entry
         """Infer type narrowing from a comparison expression."""
         # Step 1: Obtain the types of each operand and whether or not we can
         # narrow their types. (For example, we shouldn't try narrowing the
@@ -6460,6 +6462,7 @@ class TypeChecker(NodeVisitor[None], TypeCheckerSharedApi):
         narrowable_operand_index_to_hash = {}
         for i, expr in enumerate(operands):
             if not self.has_type(expr):
+                record_branch("comparison_type_narrowing_helper", 2)  # missing type -> early return
                 return {}, {}
             expr_type = self.lookup_type(expr)
             operand_types.append(expr_type)
@@ -6479,8 +6482,10 @@ class TypeChecker(NodeVisitor[None], TypeCheckerSharedApi):
                 # This is a little ad hoc, in the absence of intersection types
                 and not (isinstance(p_expr, TypeType) and isinstance(p_expr.item, TypeVarType))
             ):
+                record_branch("comparison_type_narrowing_helper", 3)  # operand ready for literal-based narrowing
                 h = literal_hash(expr)
                 if h is not None:
+                    record_branch("comparison_type_narrowing_helper", 4)  # literal hash computed successfully
                     narrowable_operand_index_to_hash[i] = h
 
         # Step 2: Group operands chained by either the 'is' or '==' operands
@@ -6513,6 +6518,7 @@ class TypeChecker(NodeVisitor[None], TypeCheckerSharedApi):
             else_map: TypeMap
 
             if operator in {"is", "is not", "==", "!="}:
+                record_branch("comparison_type_narrowing_helper", 5)  # operator is identity/equality (is, is not, ==, !=)
                 if_map, else_map = self.narrow_type_by_identity_equality(
                     operator,
                     operands,
@@ -6521,6 +6527,7 @@ class TypeChecker(NodeVisitor[None], TypeCheckerSharedApi):
                     narrowable_indices=narrowable_operand_index_to_hash.keys(),
                 )
             elif operator in {"in", "not in"}:
+                record_branch("comparison_type_narrowing_helper", 6)  # operator is membership (in, not in)
                 assert len(expr_indices) == 2
                 left_index, right_index = expr_indices
                 item_type = operand_types[left_index]
@@ -6530,8 +6537,10 @@ class TypeChecker(NodeVisitor[None], TypeCheckerSharedApi):
                 else_map = {}
 
                 if left_index in narrowable_operand_index_to_hash:
+                    record_branch("comparison_type_narrowing_helper", 7)  # left operand is narrowable in membership check
                     collection_item_type = get_proper_type(builtin_item_type(iterable_type))
                     if collection_item_type is not None:
+                        record_branch("comparison_type_narrowing_helper", 8)  # iterable item type extracted
                         if_map, else_map = self.narrow_type_by_identity_equality(
                             "==",
                             operands=[operands[left_index], operands[right_index]],
@@ -6551,9 +6560,11 @@ class TypeChecker(NodeVisitor[None], TypeCheckerSharedApi):
                             )
                             and is_overlapping_erased_types(item_type, collection_item_type)
                         ):
+                            record_branch("comparison_type_narrowing_helper", 9)  # optional narrowing applied (remove None)
                             if_map[operands[left_index]] = remove_optional(item_type)
 
                 if right_index in narrowable_operand_index_to_hash:
+                    record_branch("comparison_type_narrowing_helper", 10)  # right operand is narrowable
                     if_type, else_type = self.conditional_types_for_iterable(
                         item_type, iterable_type
                     )
@@ -6562,10 +6573,12 @@ class TypeChecker(NodeVisitor[None], TypeCheckerSharedApi):
                     else_map[expr] = else_type
 
             else:
+                record_branch("comparison_type_narrowing_helper", 11)  # fallback for unsupported operator
                 if_map = {}
                 else_map = {}
 
             if operator in {"is not", "!=", "not in"}:
+                record_branch("comparison_type_narrowing_helper", 12)  # negative comparison -> swap maps
                 if_map, else_map = else_map, if_map
 
             partial_type_maps.append((if_map, else_map))
@@ -6574,8 +6587,10 @@ class TypeChecker(NodeVisitor[None], TypeCheckerSharedApi):
         # then return soon. Otherwise try to infer restrictions involving `len(x)`.
         # TODO: support regular and len() narrowing in the same chain.
         if any(m != ({}, {}) for m in partial_type_maps):
+            record_branch("comparison_type_narrowing_helper", 13)  # found useful narrowing info
             return reduce_conditional_maps(partial_type_maps)
         else:
+            record_branch("comparison_type_narrowing_helper", 14)  # fallback to len()-based narrowing
             # Use meet for `and` maps to get correct results for chained checks
             # like `if 1 < len(x) < 4: ...`
             return reduce_conditional_maps(self.find_tuple_len_narrowing(node), use_meet=True)
