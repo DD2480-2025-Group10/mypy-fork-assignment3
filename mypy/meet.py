@@ -385,16 +385,20 @@ def is_overlapping_types(
         return True
 
     if seen_types is None:
+        _hit_is_overlapping_types(1)
         seen_types = set()
     elif (left, right) in seen_types:
+        _hit_is_overlapping_types(2)
         return True
     if is_recursive_pair(left, right):
+        _hit_is_overlapping_types(3)
         seen_types.add((left, right))
 
     left, right = get_proper_types((left, right))
 
     # We should never encounter this type.
     if isinstance(left, PartialType) or isinstance(right, PartialType):
+        _hit_is_overlapping_types(4)
         assert False, "Unexpectedly encountered partial type"
 
     # We should also never encounter these types, but it's possible a few
@@ -404,22 +408,25 @@ def is_overlapping_types(
     # TODO: Replace these with an 'assert False' once we are more confident.
     illegal_types = (UnboundType, ErasedType, DeletedType)
     if isinstance(left, illegal_types) or isinstance(right, illegal_types):
-        _hit_is_overlapping_types(1)
+        _hit_is_overlapping_types(5)
         return True
 
     # When running under non-strict optional mode, simplify away types of
     # the form 'Union[A, B, C, None]' into just 'Union[A, B, C]'.
 
     if not state.strict_optional:
+        _hit_is_overlapping_types(6)
         if isinstance(left, UnionType):
+            _hit_is_overlapping_types(7)
             left = UnionType.make_union(left.relevant_items())
         if isinstance(right, UnionType):
+            _hit_is_overlapping_types(8)
             right = UnionType.make_union(right.relevant_items())
         left, right = get_proper_types((left, right))
 
     # 'Any' may or may not be overlapping with the other type
     if isinstance(left, AnyType) or isinstance(right, AnyType):
-        _hit_is_overlapping_types(2)
+        _hit_is_overlapping_types(9)
         return not overlap_for_overloads or is_object(left) or is_object(right)
 
     # We check for complete overlaps next as a general-purpose failsafe.
@@ -438,18 +445,19 @@ def is_overlapping_types(
         or is_literal_in_union(left, right)
         or is_literal_in_union(right, left)
     ):
-        _hit_is_overlapping_types(3)
+        _hit_is_overlapping_types(10)
         return True
 
     if overlap_for_overloads:
+        _hit_is_overlapping_types(11)
         if is_none_object_overlap(left, right) or is_none_object_overlap(right, left):
-            _hit_is_overlapping_types(4)
+            _hit_is_overlapping_types(12)
             return False
 
     if are_related_types(
         left, right, proper_subtype=overlap_for_overloads, ignore_promotions=ignore_promotions
     ):
-        _hit_is_overlapping_types(5)
+        _hit_is_overlapping_types(13)
         return True
 
     # See the docstring for 'get_possible_variants' for more info on what the
@@ -469,8 +477,9 @@ def is_overlapping_types(
     # we skip these checks to avoid infinitely recursing.
 
     if prohibit_none_typevar_overlap:
+        _hit_is_overlapping_types(14)
         if is_none_typevarlike_overlap(left, right) or is_none_typevarlike_overlap(right, left):
-            _hit_is_overlapping_types(6)
+            _hit_is_overlapping_types(15)
             return False
 
     def _is_overlapping_types(left: Type, right: Type) -> bool:
@@ -493,12 +502,13 @@ def is_overlapping_types(
         or isinstance(left, TypeVarLikeType)
         or isinstance(right, TypeVarLikeType)
     ):
+        _hit_is_overlapping_types(16)
         for l in left_possible:
             for r in right_possible:
                 if _is_overlapping_types(l, r):
-                    _hit_is_overlapping_types(7)
+                    _hit_is_overlapping_types(17)
                     return True
-        _hit_is_overlapping_types(8)
+        _hit_is_overlapping_types(18)
         return False
 
     # Now that we've finished handling TypeVarLikes, we're free to end early
@@ -509,7 +519,7 @@ def is_overlapping_types(
     # a TypeVar could be bound to None, for example.
 
     if state.strict_optional and isinstance(left, NoneType) != isinstance(right, NoneType):
-        _hit_is_overlapping_types(9)
+        _hit_is_overlapping_types(19)
         return False
 
     # Next, we handle single-variant types that may be inherently partially overlapping:
@@ -521,23 +531,27 @@ def is_overlapping_types(
     # into their 'Instance' fallbacks.
 
     if isinstance(left, TypedDictType) and isinstance(right, TypedDictType):
-        _hit_is_overlapping_types(10)
+        _hit_is_overlapping_types(20)
         return are_typed_dicts_overlapping(left, right, _is_overlapping_types)
     elif typed_dict_mapping_pair(left, right):
         # Overlaps between TypedDicts and Mappings require dedicated logic.
-        _hit_is_overlapping_types(11)
+        _hit_is_overlapping_types(21)
         return typed_dict_mapping_overlap(left, right, overlapping=_is_overlapping_types)
     elif isinstance(left, TypedDictType):
+        _hit_is_overlapping_types(22)
         left = left.fallback
     elif isinstance(right, TypedDictType):
+        _hit_is_overlapping_types(23)
         right = right.fallback
 
     if is_tuple(left) and is_tuple(right):
-        _hit_is_overlapping_types(12)
+        _hit_is_overlapping_types(24)
         return are_tuples_overlapping(left, right, _is_overlapping_types)
     elif isinstance(left, TupleType):
+        _hit_is_overlapping_types(25)
         left = tuple_fallback(left)
     elif isinstance(right, TupleType):
+        _hit_is_overlapping_types(26)
         right = tuple_fallback(right)
 
     # Next, we handle single-variant types that cannot be inherently partially overlapping,
@@ -546,10 +560,11 @@ def is_overlapping_types(
     # As before, we degrade into 'Instance' whenever possible.
 
     if isinstance(left, TypeType) and isinstance(right, TypeType):
-        _hit_is_overlapping_types(13)
+        _hit_is_overlapping_types(27)
         return _is_overlapping_types(left.item, right.item)
 
     if isinstance(left, TypeType) or isinstance(right, TypeType):
+        _hit_is_overlapping_types(28)
 
         def _type_object_overlap(left: Type, right: Type) -> bool:
             """Special cases for type object types overlaps."""
@@ -573,11 +588,11 @@ def is_overlapping_types(
 
         result = _type_object_overlap(left, right) or _type_object_overlap(right, left)
         if result:
-            _hit_is_overlapping_types(14)
+            _hit_is_overlapping_types(29)
         return result
 
     if isinstance(left, Parameters) and isinstance(right, Parameters):
-        _hit_is_overlapping_types(15)
+        _hit_is_overlapping_types(30)
         return are_parameters_compatible(
             left,
             right,
@@ -588,11 +603,11 @@ def is_overlapping_types(
         )
     # A `Parameters` does not overlap with anything else, however
     if isinstance(left, Parameters) or isinstance(right, Parameters):
-        _hit_is_overlapping_types(16)
+        _hit_is_overlapping_types(31)
         return False
 
     if isinstance(left, CallableType) and isinstance(right, CallableType):
-        _hit_is_overlapping_types(17)
+        _hit_is_overlapping_types(32)
         return is_callable_compatible(
             left,
             right,
@@ -605,48 +620,57 @@ def is_overlapping_types(
     call = None
     other = None
     if isinstance(left, CallableType) and isinstance(right, Instance):
+        _hit_is_overlapping_types(33)
         call = find_member("__call__", right, right, is_operator=True)
         other = left
     if isinstance(right, CallableType) and isinstance(left, Instance):
+        _hit_is_overlapping_types(34)
         call = find_member("__call__", left, left, is_operator=True)
         other = right
     if isinstance(get_proper_type(call), FunctionLike):
         assert call is not None and other is not None
-        _hit_is_overlapping_types(18)
+        _hit_is_overlapping_types(35)
         return _is_overlapping_types(call, other)
 
     if isinstance(left, CallableType):
+        _hit_is_overlapping_types(36)
         left = left.fallback
     if isinstance(right, CallableType):
+        _hit_is_overlapping_types(37)
         right = right.fallback
 
     if isinstance(left, LiteralType) and isinstance(right, LiteralType):
+        _hit_is_overlapping_types(38)
         if left.value == right.value:
+            _hit_is_overlapping_types(39)
             # If values are the same, we still need to check if fallbacks are overlapping,
             # this is done below.
             left = left.fallback
             right = right.fallback
         else:
-            _hit_is_overlapping_types(19)
+            _hit_is_overlapping_types(40)
             return False
     elif isinstance(left, LiteralType):
+        _hit_is_overlapping_types(41)
         left = left.fallback
     elif isinstance(right, LiteralType):
+        _hit_is_overlapping_types(42)
         right = right.fallback
 
     # Finally, we handle the case where left and right are instances.
 
     if isinstance(left, Instance) and isinstance(right, Instance):
+        _hit_is_overlapping_types(43)
         # First we need to handle promotions and structural compatibility for instances
         # that came as fallbacks, so simply call is_subtype() to avoid code duplication.
         if are_related_types(
             left, right, proper_subtype=overlap_for_overloads, ignore_promotions=ignore_promotions
         ):
-            _hit_is_overlapping_types(20)
+            _hit_is_overlapping_types(44)
             return True
 
         if right.type.fullname == "builtins.int" and left.type.fullname in MYPYC_NATIVE_INT_NAMES:
-            _hit_is_overlapping_types(21)
+            _hit_is_overlapping_types(45)
             return True
 
         # Two unrelated types cannot be partially overlapping: they're disjoint.
@@ -655,10 +679,11 @@ def is_overlapping_types(
         elif right.type.has_base(left.type.fullname):
             right = map_instance_to_supertype(right, left.type)
         else:
-            _hit_is_overlapping_types(22)
+            _hit_is_overlapping_types(46)
             return False
 
         if right.type.has_type_var_tuple_type:
+            _hit_is_overlapping_types(47)
             # Similar to subtyping, we delegate the heavy lifting to the tuple overlap.
             assert right.type.type_var_tuple_prefix is not None
             assert right.type.type_var_tuple_suffix is not None
@@ -676,9 +701,11 @@ def is_overlapping_types(
             left_args = left_prefix + (TupleType(list(left_middle), fallback),) + left_suffix
             right_args = right_prefix + (TupleType(list(right_middle), fallback),) + right_suffix
         else:
+            _hit_is_overlapping_types(48)
             left_args = left.args
             right_args = right.args
         if len(left_args) == len(right_args):
+            _hit_is_overlapping_types(49)
             # Note: we don't really care about variance here, since the overlapping check
             # is symmetric and since we want to return 'True' even for partial overlaps.
             #
@@ -697,10 +724,10 @@ def is_overlapping_types(
                 _is_overlapping_types(left_arg, right_arg)
                 for left_arg, right_arg in zip(left_args, right_args)
             ):
-                _hit_is_overlapping_types(23)
+                _hit_is_overlapping_types(50)
                 return True
 
-        _hit_is_overlapping_types(24)
+        _hit_is_overlapping_types(51)
         return False
 
     # We ought to have handled every case by now: we conclude the
@@ -710,7 +737,7 @@ def is_overlapping_types(
     # to do when inferring reachability -- see  https://github.com/python/mypy/issues/5529
 
     assert type(left) != type(right), f"{type(left)} vs {type(right)}"
-    _hit_is_overlapping_types(25)
+    _hit_is_overlapping_types(52)
     return False
 
 
