@@ -15,11 +15,7 @@ def pytest_sessionfinish(session: Session, exitstatus: int) -> None:
     Hook that runs after all tests complete
     """
     try:
-        from mypy.branch_coverage import (
-            BRANCH_COVERAGE,
-            get_coverage_report,
-            save_coverage_report,
-        )
+        from mypy.branch_coverage import BRANCH_COVERAGE, get_coverage_report, save_coverage_report
 
         total_covered = sum(len(branches) for branches in BRANCH_COVERAGE.values())
 
