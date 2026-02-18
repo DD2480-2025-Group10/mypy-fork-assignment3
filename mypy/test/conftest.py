@@ -2,15 +2,24 @@
 Pytest configuration for branch coverage collection
 """
 
-import pytest
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from _pytest.main import Session
 
 
-def pytest_sessionfinish(session, exitstatus):
+def pytest_sessionfinish(session: Session, exitstatus: int) -> None:
     """
     Hook that runs after all tests complete
     """
     try:
-        from mypy.branch_coverage import save_coverage_report, get_coverage_report, BRANCH_COVERAGE
+        from mypy.branch_coverage import (
+            BRANCH_COVERAGE,
+            get_coverage_report,
+            save_coverage_report,
+        )
 
         total_covered = sum(len(branches) for branches in BRANCH_COVERAGE.values())
 

@@ -1,11 +1,13 @@
 """Branch Coverage Tracking Module"""
 
-import json
+from __future__ import annotations
+
 from pathlib import Path
+from typing import Final
 
-BRANCH_COVERAGE = {"check_return_stmt": set()}
+BRANCH_COVERAGE: dict[str, set[int]] = {"check_return_stmt": set()}
 
-BRANCH_DESCRIPTIONS = {
+BRANCH_DESCRIPTIONS: Final[dict[str, dict[int, str]]] = {
     "check_return_stmt": {
         1: "Function entry",
         2: "defn is not None - TRUE",
@@ -44,13 +46,15 @@ BRANCH_DESCRIPTIONS = {
 }
 
 
-def record_branch(function_name, branch_id):
+def record_branch(function_name: str, branch_id: int) -> None:
+    """Record that a branch has been executed."""
     if function_name in BRANCH_COVERAGE:
         BRANCH_COVERAGE[function_name].add(branch_id)
 
 
-def get_coverage_report():
-    report = []
+def get_coverage_report() -> str:
+    """Generate a coverage report as a string."""
+    report: list[str] = []
     report.append("=" * 80)
     report.append("BRANCH COVERAGE REPORT")
     report.append("=" * 80)
@@ -86,7 +90,8 @@ def get_coverage_report():
     return "\n".join(report)
 
 
-def save_coverage_report(filename="branch_coverage_report.txt"):
+def save_coverage_report(filename: str = "branch_coverage_report.txt") -> None:
+    """Save the coverage report to a file."""
     report = get_coverage_report()
     output_path = Path.cwd() / filename
     with open(output_path, "w", encoding="utf-8") as f:
