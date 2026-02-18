@@ -25,7 +25,7 @@ BRANCH_DESCRIPTIONS = {
 def your_function_name(self, param):
     from mypy.branch_coverage import record_branch
     record_branch('your_function_name', 1)  # Function entry
-    
+
     if condition_x:
         record_branch('your_function_name', 2)  # TRUE
         # code...
@@ -49,10 +49,10 @@ def your_function_name(self, param):
 # Activate virtual environment first
 source venv/bin/activate
 
-# Run all tests 
+# Run all tests
 pytest mypy/test/testcheck.py -n0
 
-# Run specific test file 
+# Run specific test file
 pytest mypy/test/testcheck.py::TypeCheckSuite::::check-basic.test::testInvalidReturn -n0
 ```
 
