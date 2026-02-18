@@ -1,11 +1,13 @@
 """Branch Coverage Tracking Module"""
 
 from __future__ import annotations
-
 from pathlib import Path
 from typing import Final
 
-BRANCH_COVERAGE: dict[str, set[int]] = {"check_return_stmt": set(), "comparison_type_narrowing_helper": set()}
+BRANCH_COVERAGE: dict[str, set[int]] = {
+    "check_return_stmt": set(),
+    "comparison_type_narrowing_helper": set(),
+}
 
 BRANCH_DESCRIPTIONS: Final[dict[str, dict[int, str]]] = {
     "check_return_stmt": {
@@ -58,7 +60,7 @@ BRANCH_DESCRIPTIONS: Final[dict[str, dict[int, str]]] = {
         12: "Negative comparison -> maps swapped",
         13: "Non-trivial narrowing found -> return reduced maps",
         14: "Fallback to len()-based narrowing",
-    }
+    },
 }
 
 

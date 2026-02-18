@@ -3826,3 +3826,49 @@ def get_owner(uid: UserId, tid: TeamId):
             reveal_type(INVALID)  # N: Revealed type is "builtins.int"
             return None
 [builtins fixtures/primitives.pyi]
+
+# MY ADDED TESTS
+
+[case testNarrowingWithMembershipOperator]
+# flags: --strict-equality --warn-unreachable
+from typing import Union
+
+class BaseItem:
+    category: int
+
+class ItemA(BaseItem):
+    category: int
+
+class ItemB(BaseItem):
+    category: int
+
+class ItemC(BaseItem):
+    category: int
+
+valid_categories: list[int] = [1, 2, 3]
+
+item: Union[ItemA, ItemB, ItemC]
+
+# Test membership operator with narrowable operand
+if item.category in valid_categories:
+    reveal_type(item)  # N: Revealed type is "__main__.ItemA | __main__.ItemB | __main__.ItemC"
+    reveal_type(item.category)  # N: Revealed type is "builtins.int"
+else:
+    reveal_type(item)  # N: Revealed type is "__main__.ItemA | __main__.ItemB | __main__.ItemC"
+    reveal_type(item.category)  # N: Revealed type is "builtins.int"
+[builtins fixtures/list.pyi]
+
+
+[case testNarrowingMembershipWithOptionalNarrowing]
+# flags: --strict-equality --warn-unreachable
+from typing import Union, Tuple, Optional
+
+x: Tuple[Optional[int], str] = (None, "hello")
+valid_items: list[int] = [1, 2, 3, 4, 5]
+
+# Test membership operator path with optional item narrowing whichtests the rare Branch 9
+if x[0] in valid_items:
+    reveal_type(x[0])  # N: Revealed type is "builtins.int"
+else:
+    reveal_type(x[0])  # N: Revealed type is "builtins.int | None"
+[builtins fixtures/list.pyi]
