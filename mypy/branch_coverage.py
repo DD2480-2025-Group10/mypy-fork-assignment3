@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Final
 
-BRANCH_COVERAGE: dict[str, set[int]] = {"check_return_stmt": set()}
+BRANCH_COVERAGE: dict[str, set[int]] = {"check_return_stmt": set(), "comparison_type_narrowing_helper": set()}
 
 BRANCH_DESCRIPTIONS: Final[dict[str, dict[int, str]]] = {
     "check_return_stmt": {
@@ -42,6 +42,22 @@ BRANCH_DESCRIPTIONS: Final[dict[str, dict[int, str]]] = {
         31: "isinstance(return_type, (NoneType, AnyType)) - FALSE",
         32: "self.in_checked_function() - TRUE",
         33: "self.in_checked_function() - FALSE",
+    },
+    "comparison_type_narrowing_helper": {
+        1: "Function entry",
+        2: "Operand missing type -> early return",
+        3: "Operand eligible for literal-based narrowing",
+        4: "Literal hash computed successfully",
+        5: "Operator is identity/equality (is, is not, ==, !=)",
+        6: "Operator is membership (in, not in)",
+        7: "Left operand is narrowable in membership check",
+        8: "Iterable item type extracted",
+        9: "Optional narrowing applied (remove None)",
+        10: "Right operand is narrowable in membership check",
+        11: "Fallback for unsupported operator",
+        12: "Negative comparison -> maps swapped",
+        13: "Non-trivial narrowing found -> return reduced maps",
+        14: "Fallback to len()-based narrowing",
     }
 }
 
