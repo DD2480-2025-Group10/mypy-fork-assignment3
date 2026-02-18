@@ -1,0 +1,121 @@
+================================================================================
+BRANCH COVERAGE REPORT
+================================================================================
+
+================================================================================
+Function: check_return_stmt
+================================================================================
+Coverage: 0/33 branches (0.0%)
+
+  Branch  1: NOT COVERED     | Function entry
+  Branch  2: NOT COVERED     | defn is not None - TRUE
+  Branch  3: NOT COVERED     | defn is not None - FALSE
+  Branch  4: NOT COVERED     | defn.is_generator - TRUE
+  Branch  5: NOT COVERED     | defn.is_generator - FALSE (else/elif)
+  Branch  6: NOT COVERED     | defn.is_coroutine - TRUE
+  Branch  7: NOT COVERED     | defn.is_coroutine - FALSE (else)
+  Branch  8: NOT COVERED     | isinstance(return_type, UninhabitedType) - TRUE
+  Branch  9: NOT COVERED     | isinstance(return_type, UninhabitedType) - FALSE
+  Branch 10: NOT COVERED     | not is_lambda and not return_type.ambiguous - TRUE
+  Branch 11: NOT COVERED     | not is_lambda and not return_type.ambiguous - FALSE
+  Branch 12: NOT COVERED     | s.expr - TRUE (has return value)
+  Branch 13: NOT COVERED     | s.expr - FALSE (empty return)
+  Branch 14: NOT COVERED     | isinstance(s.expr, (CallExpr, ...)) or isinstance(s.expr, AwaitExpr) - TRUE
+  Branch 15: NOT COVERED     | isinstance(s.expr, (CallExpr, ...)) or isinstance(s.expr, AwaitExpr) - FALSE
+  Branch 16: NOT COVERED     | isinstance(typ, Instance) and typ.type.fullname in NOT_IMPLEMENTED - TRUE
+  Branch 17: NOT COVERED     | isinstance(typ, Instance) and typ.type.fullname in NOT_IMPLEMENTED - FALSE
+  Branch 18: NOT COVERED     | defn.is_async_generator - TRUE
+  Branch 19: NOT COVERED     | defn.is_async_generator - FALSE
+  Branch 20: NOT COVERED     | isinstance(typ, AnyType) - TRUE
+  Branch 21: NOT COVERED     | isinstance(typ, AnyType) - FALSE
+  Branch 22: NOT COVERED     | warn_return_any conditions - TRUE (all conditions met)
+  Branch 23: NOT COVERED     | warn_return_any conditions - FALSE (at least one condition not met)
+  Branch 24: NOT COVERED     | declared_none_return - TRUE
+  Branch 25: NOT COVERED     | declared_none_return - FALSE
+  Branch 26: NOT COVERED     | is_lambda or isinstance(typ, NoneType) - TRUE
+  Branch 27: NOT COVERED     | is_lambda or isinstance(typ, NoneType) - FALSE
+  Branch 28: NOT COVERED     | defn.is_generator and not defn.is_coroutine and isinstance(return_type, AnyType) - TRUE
+  Branch 29: NOT COVERED     | defn.is_generator and not defn.is_coroutine and isinstance(return_type, AnyType) - FALSE
+  Branch 30: NOT COVERED     | isinstance(return_type, (NoneType, AnyType)) - TRUE
+  Branch 31: NOT COVERED     | isinstance(return_type, (NoneType, AnyType)) - FALSE
+  Branch 32: NOT COVERED     | self.in_checked_function() - TRUE
+  Branch 33: NOT COVERED     | self.in_checked_function() - FALSE
+
+================================================================================
+UNCOVERED BRANCHES:
+================================================================================
+  Branch  1: Function entry
+  Branch  2: defn is not None - TRUE
+  Branch  3: defn is not None - FALSE
+  Branch  4: defn.is_generator - TRUE
+  Branch  5: defn.is_generator - FALSE (else/elif)
+  Branch  6: defn.is_coroutine - TRUE
+  Branch  7: defn.is_coroutine - FALSE (else)
+  Branch  8: isinstance(return_type, UninhabitedType) - TRUE
+  Branch  9: isinstance(return_type, UninhabitedType) - FALSE
+  Branch 10: not is_lambda and not return_type.ambiguous - TRUE
+  Branch 11: not is_lambda and not return_type.ambiguous - FALSE
+  Branch 12: s.expr - TRUE (has return value)
+  Branch 13: s.expr - FALSE (empty return)
+  Branch 14: isinstance(s.expr, (CallExpr, ...)) or isinstance(s.expr, AwaitExpr) - TRUE
+  Branch 15: isinstance(s.expr, (CallExpr, ...)) or isinstance(s.expr, AwaitExpr) - FALSE
+  Branch 16: isinstance(typ, Instance) and typ.type.fullname in NOT_IMPLEMENTED - TRUE
+  Branch 17: isinstance(typ, Instance) and typ.type.fullname in NOT_IMPLEMENTED - FALSE
+  Branch 18: defn.is_async_generator - TRUE
+  Branch 19: defn.is_async_generator - FALSE
+  Branch 20: isinstance(typ, AnyType) - TRUE
+  Branch 21: isinstance(typ, AnyType) - FALSE
+  Branch 22: warn_return_any conditions - TRUE (all conditions met)
+  Branch 23: warn_return_any conditions - FALSE (at least one condition not met)
+  Branch 24: declared_none_return - TRUE
+  Branch 25: declared_none_return - FALSE
+  Branch 26: is_lambda or isinstance(typ, NoneType) - TRUE
+  Branch 27: is_lambda or isinstance(typ, NoneType) - FALSE
+  Branch 28: defn.is_generator and not defn.is_coroutine and isinstance(return_type, AnyType) - TRUE
+  Branch 29: defn.is_generator and not defn.is_coroutine and isinstance(return_type, AnyType) - FALSE
+  Branch 30: isinstance(return_type, (NoneType, AnyType)) - TRUE
+  Branch 31: isinstance(return_type, (NoneType, AnyType)) - FALSE
+  Branch 32: self.in_checked_function() - TRUE
+  Branch 33: self.in_checked_function() - FALSE
+
+================================================================================
+Function: solve_constraints
+================================================================================
+Coverage: 26/28 branches (92.9%)
+
+  Branch  1: NOT COVERED     | not vars - TRUE
+  Branch  2: COVERED         | tv in original_vars
+  Branch  3: COVERED         | c in constraints
+  Branch  4: COVERED         | v in c.extra_vars (1)
+  Branch  5: COVERED         | v.id not in vars + extra_vars
+  Branch  6: COVERED         | v in c.extra_tvars (2)
+  Branch  7: COVERED         | v.id not in originals
+  Branch  8: COVERED         | allow_polymorphic - TRUE (1)
+  Branch  9: COVERED         | tv in vars + extra_vars
+  Branch 10: COVERED         | con in constraints
+  Branch 11: COVERED         | con.type_var in vars + extra_vars
+  Branch 12: COVERED         | allow_polymorphic - TRUE (2)
+  Branch 13: COVERED         | constraints - TRUE
+  Branch 14: COVERED         | constraints - FALSE
+  Branch 15: COVERED         | allow_polymorphic - FALSE (2)
+  Branch 16: COVERED         | tv, cs in cmap.items()
+  Branch 17: COVERED         | not cs - TRUE
+  Branch 18: COVERED         | c in cs (1)
+  Branch 19: COVERED         | c.op == SUPERTYPE_OF - TRUE
+  Branch 20: COVERED         | c in cs (2)
+  Branch 21: COVERED         | c.op == SUBTYPE_OF - TRUE
+  Branch 22: COVERED         | solution is None or not get_vars(...) - TRUE
+  Branch 23: COVERED         | v in vars
+  Branch 24: COVERED         | v in solutions - TRUE
+  Branch 25: COVERED         | v in solutions - FALSE
+  Branch 26: COVERED         | strict - TRUE
+  Branch 27: NOT COVERED     | strict - FALSE
+  Branch 28: COVERED         | not free_vars and not skip_uninhabited - TRUE
+
+================================================================================
+UNCOVERED BRANCHES:
+================================================================================
+  Branch  1: not vars - TRUE
+  Branch 27: strict - FALSE
+
+================================================================================
