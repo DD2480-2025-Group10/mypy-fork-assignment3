@@ -1,0 +1,30 @@
+-- Branch 28: defn.is_generator and not defn.is_coroutine and isinstance(return_type, AnyType) - TRUE
+-- Need: generator (not async) with Any return type, empty return
+[case testGeneratorWithAnyTypeEmptyReturn]
+from typing import Any, Generator
+def gen() -> Generator[int, None, Any]:
+    yield 1
+    yield 2
+    return
+[builtins fixtures/dict.pyi]
+[typing fixtures/typing-medium.pyi]
+
+[case testPlainGeneratorWithAnyReturn]
+from typing import Any
+def gen_any() -> Any:
+    yield 42
+    return
+
+-- Branch 33: self.in_checked_function() - FALSE
+-- Need: unannotated function (no return type annotation) + empty return
+-- AND: return_type is NOT None or Any (must fail Branch 30 check)
+[case testUnannotatedEmptyReturn]
+def unannotated():
+    x = 100
+    return
+
+[case testPartialAnnotationEmptyReturn]
+[builtins fixtures/tuple.pyi]
+def partial(x: int, y: str):
+    z = (x, y)
+    return

@@ -2202,8 +2202,7 @@ class TypeChecker(NodeVisitor[None], TypeCheckerSharedApi):
             and (self.options.check_untyped_defs or not defn.is_dynamic())
             and (
                 # don't check override for synthesized __replace__ methods from dataclasses
-                defn.name != "__replace__"
-                or defn.info.metadata.get("dataclass_tag") is None
+                defn.name != "__replace__" or defn.info.metadata.get("dataclass_tag") is None
             )
         )
         found_method_base_classes: list[TypeInfo] = []
@@ -4427,7 +4426,8 @@ class TypeChecker(NodeVisitor[None], TypeCheckerSharedApi):
             self.store_type(lvalue, lvalue_type)
         elif isinstance(lvalue, (TupleExpr, ListExpr)):
             types = [
-                self.check_lvalue(sub_expr)[0] or
+                self.check_lvalue(sub_expr)[0]
+                or
                 # This type will be used as a context for further inference of rvalue,
                 # we put Uninhabited if there is no information available from lvalue.
                 UninhabitedType()
@@ -4975,26 +4975,43 @@ class TypeChecker(NodeVisitor[None], TypeCheckerSharedApi):
         return typ
 
     def check_return_stmt(self, s: ReturnStmt) -> None:
+        from mypy.branch_coverage import record_branch
+
+        record_branch("check_return_stmt", 1)  # Function entry
+
         defn = self.scope.current_function()
         if defn is not None:
+            record_branch("check_return_stmt", 2)  # defn is not None - TRUE
             if defn.is_generator:
+                record_branch("check_return_stmt", 4)  # is_generator - TRUE
                 return_type = self.get_generator_return_type(
                     self.return_types[-1], defn.is_coroutine
                 )
             elif defn.is_coroutine:
+                record_branch("check_return_stmt", 5)  # is_generator - FALSE
+                record_branch("check_return_stmt", 6)  # is_coroutine - TRUE
                 return_type = self.get_coroutine_return_type(self.return_types[-1])
             else:
+                record_branch("check_return_stmt", 5)  # is_generator - FALSE
+                record_branch("check_return_stmt", 7)  # is_coroutine - FALSE
                 return_type = self.return_types[-1]
             return_type = get_proper_type(return_type)
 
             is_lambda = isinstance(defn, LambdaExpr)
             if isinstance(return_type, UninhabitedType):
+                record_branch("check_return_stmt", 8)  # UninhabitedType - TRUE
                 # Avoid extra error messages for failed inference in lambdas
                 if not is_lambda and not return_type.ambiguous:
+                    record_branch("check_return_stmt", 10)  # conditions - TRUE
                     self.fail(message_registry.NO_RETURN_EXPECTED, s)
                     return
+                else:
+                    record_branch("check_return_stmt", 11)  # conditions - FALSE
+            else:
+                record_branch("check_return_stmt", 9)  # UninhabitedType - FALSE
 
             if s.expr:
+                record_branch("check_return_stmt", 12)  # s.expr - TRUE (has return value)
                 declared_none_return = isinstance(return_type, NoneType)
                 declared_any_return = isinstance(return_type, AnyType)
 
@@ -5011,12 +5028,14 @@ class TypeChecker(NodeVisitor[None], TypeCheckerSharedApi):
                     or isinstance(s.expr, AwaitExpr)
                     and isinstance(s.expr.expr, CallExpr)
                 ):
+                    record_branch("check_return_stmt", 14)  # complex expr - TRUE
                     # For expressions that (strongly) depend on type context (i.e. those that
                     # are handled like a function call), we allow fallback to empty type context
                     # in case of errors, this improves user experience in some cases,
                     # see e.g. testReturnFallbackInference.
                     typ = self.infer_context_dependent(s.expr, return_type, allow_none_func_call)
                 else:
+                    record_branch("check_return_stmt", 15)  # complex expr - FALSE
                     typ = get_proper_type(
                         self.expr_checker.accept(
                             s.expr, return_type, allow_none_return=allow_none_func_call
@@ -5025,13 +5044,21 @@ class TypeChecker(NodeVisitor[None], TypeCheckerSharedApi):
                 # Treat NotImplemented as having type Any, consistent with its
                 # definition in typeshed prior to python/typeshed#4222.
                 if isinstance(typ, Instance) and typ.type.fullname in NOT_IMPLEMENTED_TYPE_NAMES:
+                    record_branch("check_return_stmt", 16)  # NotImplemented - TRUE
                     typ = AnyType(TypeOfAny.special_form)
+                else:
+                    record_branch("check_return_stmt", 17)  # NotImplemented - FALSE
 
                 if defn.is_async_generator:
+                    record_branch("check_return_stmt", 18)  # is_async_generator - TRUE
                     self.fail(message_registry.RETURN_IN_ASYNC_GENERATOR, s)
                     return
+                else:
+                    record_branch("check_return_stmt", 19)  # is_async_generator - FALSE
+                    record_branch("check_return_stmt", 19)  # is_async_generator - FALSE
                 # Returning a value of type Any is always fine.
                 if isinstance(typ, AnyType):
+                    record_branch("check_return_stmt", 20)  # AnyType - TRUE
                     # (Unless you asked to be warned in that case, and the
                     # function is not declared to return Any)
                     if (
@@ -5048,18 +5075,30 @@ class TypeChecker(NodeVisitor[None], TypeCheckerSharedApi):
                         )
                         and not is_lambda
                     ):
+                        record_branch("check_return_stmt", 22)  # warn_return_any conditions - TRUE
                         self.msg.incorrectly_returning_any(return_type, s)
+                    else:
+                        record_branch(
+                            "check_return_stmt", 23
+                        )  # warn_return_any conditions - FALSE
                     return
+                else:
+                    record_branch("check_return_stmt", 21)  # AnyType - FALSE
 
                 # Disallow return expressions in functions declared to return
                 # None, subject to two exceptions below.
                 if declared_none_return:
+                    record_branch("check_return_stmt", 24)  # declared_none_return - TRUE
                     # Lambdas are allowed to have None returns.
                     # Functions returning a value of type None are allowed to have a None return.
                     if is_lambda or isinstance(typ, NoneType):
+                        record_branch("check_return_stmt", 26)  # lambda or NoneType - TRUE
                         return
+                    else:
+                        record_branch("check_return_stmt", 27)  # lambda or NoneType - FALSE
                     self.fail(message_registry.NO_RETURN_VALUE_EXPECTED, s)
                 else:
+                    record_branch("check_return_stmt", 25)  # declared_none_return - FALSE
                     self.check_subtype(
                         subtype_label="got",
                         subtype=typ,
@@ -5070,6 +5109,7 @@ class TypeChecker(NodeVisitor[None], TypeCheckerSharedApi):
                         msg=message_registry.INCOMPATIBLE_RETURN_VALUE_TYPE,
                     )
             else:
+                record_branch("check_return_stmt", 13)  # s.expr - FALSE (empty return)
                 # Empty returns are valid in Generators with Any typed returns, but not in
                 # coroutines.
                 if (
@@ -5077,13 +5117,24 @@ class TypeChecker(NodeVisitor[None], TypeCheckerSharedApi):
                     and not defn.is_coroutine
                     and isinstance(return_type, AnyType)
                 ):
+                    record_branch("check_return_stmt", 28)  # generator + AnyType - TRUE
                     return
+                else:
+                    record_branch("check_return_stmt", 29)  # generator + AnyType - FALSE
 
                 if isinstance(return_type, (NoneType, AnyType)):
+                    record_branch("check_return_stmt", 30)  # NoneType or AnyType - TRUE
                     return
+                else:
+                    record_branch("check_return_stmt", 31)  # NoneType or AnyType - FALSE
 
                 if self.in_checked_function():
+                    record_branch("check_return_stmt", 32)  # in_checked_function - TRUE
                     self.fail(message_registry.RETURN_VALUE_EXPECTED, s)
+                else:
+                    record_branch("check_return_stmt", 33)  # in_checked_function - FALSE
+        else:
+            record_branch("check_return_stmt", 3)  # defn is not None - FALSE
 
     def visit_if_stmt(self, s: IfStmt) -> None:
         """Type check an if statement."""
