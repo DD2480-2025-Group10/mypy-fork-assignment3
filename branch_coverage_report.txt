@@ -81,34 +81,26 @@ UNCOVERED BRANCHES:
 ================================================================================
 Function: comparison_type_narrowing_helper
 ================================================================================
-Coverage: 5/14 branches (35.7%)
+Coverage: 13/14 branches (92.9%)
 
   Branch  1: COVERED         | Function entry
   Branch  2: NOT COVERED     | Operand missing type -> early return
   Branch  3: COVERED         | Operand eligible for literal-based narrowing
   Branch  4: COVERED         | Literal hash computed successfully
   Branch  5: COVERED         | Operator is identity/equality (is, is not, ==, !=)
-  Branch  6: NOT COVERED     | Operator is membership (in, not in)
-  Branch  7: NOT COVERED     | Left operand is narrowable in membership check
-  Branch  8: NOT COVERED     | Iterable item type extracted
-  Branch  9: NOT COVERED     | Optional narrowing applied (remove None)
-  Branch 10: NOT COVERED     | Right operand is narrowable in membership check
-  Branch 11: NOT COVERED     | Fallback for unsupported operator
-  Branch 12: NOT COVERED     | Negative comparison -> maps swapped
-  Branch 13: NOT COVERED     | Non-trivial narrowing found -> return reduced maps
+  Branch  6: COVERED         | Operator is membership (in, not in)
+  Branch  7: COVERED         | Left operand is narrowable in membership check
+  Branch  8: COVERED         | Iterable item type extracted
+  Branch  9: COVERED         | Optional narrowing applied (remove None)
+  Branch 10: COVERED         | Right operand is narrowable in membership check
+  Branch 11: COVERED         | Fallback for unsupported operator
+  Branch 12: COVERED         | Negative comparison -> maps swapped
+  Branch 13: COVERED         | Non-trivial narrowing found -> return reduced maps
   Branch 14: COVERED         | Fallback to len()-based narrowing
 
 ================================================================================
 UNCOVERED BRANCHES:
 ================================================================================
   Branch  2: Operand missing type -> early return
-  Branch  6: Operator is membership (in, not in)
-  Branch  7: Left operand is narrowable in membership check
-  Branch  8: Iterable item type extracted
-  Branch  9: Optional narrowing applied (remove None)
-  Branch 10: Right operand is narrowable in membership check
-  Branch 11: Fallback for unsupported operator
-  Branch 12: Negative comparison -> maps swapped
-  Branch 13: Non-trivial narrowing found -> return reduced maps
 
 ================================================================================
