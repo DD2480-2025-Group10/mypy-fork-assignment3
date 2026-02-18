@@ -42,6 +42,9 @@ htmlcov
 # pytest cache
 .pytest_cache/
 
+# Manual is_overlapping_types coverage logs
+is_overlapping_types_coverage/logs/
+
 # virtualenv
 .Python
 bin/
