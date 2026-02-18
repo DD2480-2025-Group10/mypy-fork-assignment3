@@ -75,8 +75,8 @@ The quality of our own coverage measurement is quiet limited as it's very annoyi
 
 The result of the coverage analyzer was that 49/51 branches were already covered under existing test suite. Of these 3, 2 were unreachable by design so impossible to test. So I added the one test for the branch I could reach and created 3 different tests for path coverage. This was also very difficult to look at the existing test suite and try to figure out if the path had already been covered so I did my best to try and figure it out, but it's almost impossible to actually check on such a large test suite.
 
-### `comparing_type_narrowing_help@mypy/checker.py`
-Lizard's output for `covering_type_narrowing_helper` in `mypy/checker.py` is as follows:
+### `comparison_type_narrowing_help@mypy/checker.py`
+Lizard's output for `comparison_type_narrowing_helper` in `mypy/checker.py` is as follows:
 
 ```
   NLOC    CCN   token  PARAM  length  location
@@ -98,8 +98,41 @@ The documentation of the function gives a overview of its purpose. However, give
 
 The result of the coverage analysis for comparison_type_narrowing_helper() showed that most branches (13/14) were already exercised by the existing mypy test suite. However, Branch 2 was determined to be unreachable by design, making it impossible to cover through additional tests. I then chose to think about path coverage. To improve coverage, I therefore added two additional tests focused on path coverage, ensuring that different combinations of comparison and membership logic are exercised. Identifying whether particular paths were already covered was challenging due to the size and complexity of the existing test suite.
 
+### `check_return_stmt@mypy/checker.py`
+Lizard's output for `check_return_stmt` in `mypy/checker.py` is as follows:
+```
+  NLOC    CCN   token  PARAM  length  location
+------------------------------------------------
+    80     33     468      2      110  check_return_stmt@4977-5086@./mypy/checker.py
+```
 
 
+By manually counting decision points including `if`, `elif`, `else`, and logical operators (`and`, `or`), we counted **33 branches**. Using the formula CC = π - s + 2 (with 33 decision points and 7 exit points), we get CC = 33 - 7 + 2 = **28**, which differs from Lizard's **33**.
+
+The discrepancy arises because Lizard counts each branch point individually (including compound conditions with `and`/`or` as separate branches), while the manual calculation using the graph-based formula factors in exit points. Both approaches agree that this function has high complexity.
+
+This function is complex but moderately sized at 80 non-comment lines of code. The complexity comes from handling multiple return statement scenarios: generators, coroutines, async generators, lambdas, typed returns, untyped returns, and various type checking rules (Any, None, UninhabitedType, etc.).
+
+The purpose of `check_return_stmt` is to validate return statements during type checking. It ensures return values match declared return types, handles special cases for generators/coroutines, and reports errors for incompatible returns. This is a critical function in mypy's type checking pipeline.
+
+No exceptions are raised in this function. The function returns early in multiple paths and uses `self.fail()` to report type errors rather than raising exceptions.
+
+The function lacks detailed documentation. There are no comments explaining the complex branching logic, making it difficult to understand the relationships between different checks (e.g., why `UninhabitedType` is checked before expression analysis). A docstring describing the main validation scenarios would improve maintainability.
+
+**Refactoring Plan**: The function could be decomposed into separate helper methods for different return types:
+- `_check_generator_return()` for generator-specific logic
+- `_check_coroutine_return()` for coroutine handling  
+- `_check_typed_return()` for expression type checking
+- `_check_empty_return()` for empty return statements
+
+This would reduce CC from 33 to approximately 5-8 per function, improving readability while introducing slight overhead from additional function calls.
+
+**Coverage Results**: Running the existing test suite with our DIY branch coverage tool shows **30/33 branches covered (90.9%)**. Three branches remain uncovered:
+- Branch 3: `defn is None` - Unreachable as return statements outside functions are syntax errors
+- Branch 28: Generator with Any return type + empty return
+- Branch 33: Unchecked function with empty return
+
+After adding 4 new test cases targeting uncovered branches, coverage improved to **31/33 (93.9%)**. Branch 28 was successfully covered, but Branch 33 remains difficult to trigger due to mypy's type inference behavior (unannotated functions typically infer `None` or `Any`, bypassing this branch).
 ## Refactoring
 
 Plan for refactoring complex code:
