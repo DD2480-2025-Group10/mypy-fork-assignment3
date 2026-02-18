@@ -71,7 +71,8 @@ def _report_is_overlapping_types_coverage() -> None:
     try:
         pid = os.getpid()
         timestamp = int(time.time())
-        out_dir = os.path.join("is_overlapping_types_coverage", "logs")
+        repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        out_dir = os.path.join(repo_root, "is_overlapping_types_coverage", "logs")
         os.makedirs(out_dir, exist_ok=True)
         filename = os.path.join(out_dir, f"coverage_{pid}_{timestamp}.txt")
         with open(filename, "w", encoding="utf8") as f:
