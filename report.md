@@ -57,6 +57,50 @@ The documentation for the function is not very clear. The code is somewhat descr
 - Branch 27: `not strict` the function is always tested with strict mode enabled.
 For in an in detail view of the results the report can be found [here](https://github.com/DD2480-2025-Group10/mypy-fork-assignment3/pull/19/changes).
 
+#### Refactoring Plan
+In order to refactor a function like this, I would first try to identify what is wrong with the current structure, and how impactful the refactoring would be. In this case I begin by noticing that the functions external dependencies are quite few:
+- `mypy/subtypes.py:2053`
+- `mypy/infer.py:63`
+- `mypy/infer.py:76`
+
+Hence I would argue the changing the function signature is alright in this case, although this is not generally the case for functions with a lot of dependants.
+
+Is the signature of the function the issue though? I would argue yes. The function essentially has two modes of solving types depending on if polymorphic functions are allowed or not. Already there the function is conceptually two separate functions. Furthermore, the function handles unsolvable constraints in two different ways depending on the `strict` flag. Once again, this is conceptually two separate functions.
+
+I would argue that in general, passing boolean flags to change the behaviour of a function is significant code smell. What happens if they need to handle one more case? One more flag?
+
+Instead, I would refactor the function into at least two separate concerns:
+- Producing solutions for satisfiable variables
+- Handling variables that cannot be solved
+
+This introduces a calling order concern, since it seems that we only know what variables cannot be solved after we have attempted to solve the constraints. However, this can be handled by having the second function take as input a typed structure of output from the first function.
+
+Since we produce solutions in separate ways depending on the `allow_polymorphic` flag I would ague that this should be a separate concern as well. The `solve_constraints` function would take as input an interface/strategy for how to solve the constraints and simply apply that strategy to each of the variables. Conceptually it would look something like this:
+
+```
+interface ConstraintSolverStrategy:
+  ...
+
+class PolymorphicConstraintSolverStrategy(ConstraintSolverStrategy):
+  ...
+
+class DefaultConstraintSolverStrategy(ConstraintSolverStrategy):
+  ...
+
+struct SolvingResult:
+  solved: ...
+  unsolved: ...
+
+def solve_constraints(..., strategy: ConstraintSolverStrategy) ->:
+  for var in vars:
+    solution = strategy.solve(var, var.constraints)
+    ...
+```
+
+This would dramatically reduce the complexity of the functions and make it much easier to read and maintain. It also makes it easier to add new solving strategies. Furthermore a similar approach can be taken for handling unsolvable constraints.
+
+Lastly, the function does some pre_validation at the end of the function. This is simply a separate concern that should absolutely be factored out into a separate call.
+
 ### `is_overlapping_types@mypy/meet.py`
 Lizard's output for `is_overlapping_types` in `mypy/meet.py` is as follows:
 ```
@@ -136,6 +180,7 @@ This would reduce CC from 33 to approximately 5-8 per function, improving readab
 - Branch 33: Unchecked function with empty return
 
 After adding 4 new test cases targeting uncovered branches, coverage improved to **31/33 (93.9%)**. Branch 28 was successfully covered, but Branch 33 remains difficult to trigger due to mypy's type inference behavior (unannotated functions typically infer `None` or `Any`, bypassing this branch).
+
 ## Refactoring
 
 Plan for refactoring complex code:
