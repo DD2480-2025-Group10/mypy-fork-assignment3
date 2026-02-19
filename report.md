@@ -122,7 +122,7 @@ The quality of our own coverage measurement is quiet limited as it's very annoyi
 
 The result of the coverage analyzer was that 49/51 branches were already covered under existing test suite. Of these 3, 2 were unreachable by design so impossible to test. So I added the one test for the branch I could reach and created 3 different tests for path coverage. This was also very difficult to look at the existing test suite and try to figure out if the path had already been covered so I did my best to try and figure it out, but it's almost impossible to actually check on such a large test suite.
 
-### `comparison_type_narrowing_help@mypy/checker.py`
+### `comparison_type_narrowing_helper@mypy/checker.py`
 Lizard's output for `comparison_type_narrowing_helper` in `mypy/checker.py` is as follows:
 
 ```
@@ -143,7 +143,19 @@ There are no try/except blocks in this function, so exception handling is not ta
 
 The documentation of the function gives a overview of its purpose. However, given the large number of branches and special cases, the documentation does not fully describe all possible outcomes. Understanding the exact behavior in edge cases requires reading the implementation. Additional comments would help.
 
+**Coverage Results**: Running the test suite with our DIY branch coverage tool shows that **13/14 (92.9%)** of branches are covered by tests. The missing branches are
+- Branch 2: `not self.has_type`: This branch is unreachable by design because it requires the comparison expression not having a type which will result in errors from mypy's type checking. It functions as defensive code if any upstream code would be wrong. This is probably why this branch isn't tested.
+
 The result of the coverage analysis for comparison_type_narrowing_helper() showed that most branches (13/14) were already exercised by the existing mypy test suite. However, Branch 2 was determined to be unreachable by design, making it impossible to cover through additional tests. I then chose to think about path coverage. To improve coverage, I therefore added two additional tests focused on path coverage, ensuring that different combinations of comparison and membership logic are exercised. Identifying whether particular paths were already covered was challenging due to the size and complexity of the existing test suite.
+
+**Refactoring Plan**: The function comparison_type_narrowing_helper() could be seperated into different helper functions that handle different operators cases:
+- `_handle_identity_equality()` — logic for is, is not, ==, != 
+- `_handle_membership_comparison()` — logic for in and not in 
+- `_apply_optional_narrowing()` — removes None from Optional types when safe 
+- `_swap_maps_for_negative_comparison()` — handles negative comparison cases 
+- `_fallback_len_narrowing()` — fallback narrowing logic
+
+This would help a lot with readbility of the function aswell as hopefully after refactoring, each helper will have around 5-8 complexity instead of 30.
 
 ### `check_return_stmt@mypy/checker.py`
 Lizard's output for `check_return_stmt` in `mypy/checker.py` is as follows:
