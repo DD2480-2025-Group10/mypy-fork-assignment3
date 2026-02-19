@@ -74,7 +74,7 @@ There are no exceptions or try/catch blocks. The function contains a few asserts
 There is quiet a bit of documentation around the different branches.
 
 
-The quality of our own coverage measurement is quiet limited as it's very annoying to add new paths and requires quiet a bit of boilerplate. This function has no ternary operators or excpetions so that is not applicable here. I did not use an automated tool for this one.
+The quality of our own coverage measurement is quiet limited as it's very annoying to add new paths and requires quiet a bit of boilerplate. This function has no ternary operators or exceptions so that is not applicable here. I did not use an automated tool for this one.
 
 The result of the coverage analyzer was that 49/51 branches were already covered under existing test suite. Of these 3, 2 were unreachable by design so impossible to test. So I added the one test for the branch I could reach and created 3 different tests for path coverage. This was also very difficult to look at the existing test suite and try to figure out if the path had already been covered so I did my best to try and figure it out, but it's almost impossible to actually check on such a large test suite.
 
