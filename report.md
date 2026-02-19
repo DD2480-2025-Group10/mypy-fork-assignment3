@@ -194,32 +194,26 @@ git diff ...
 ## Coverage
 
 ### Tools
-
-Document your experience in using a "new"/different coverage tool.
-
-How well was the tool documented? Was it possible/easy/difficult to
-integrate it with your build environment?
+In the existing codebase, `pytest-cov` was already set up to measure branch coverage. It was not that easy to get it working as it required some special commands line arguments to be passed when running the tests, which was not documented anywhere. But after some trial and error we were able to get it working. Also the measurements of `pytest-cov` are only reported on a per-file basis, therefore to get a more detailed view of coverage for specific functions we had to manually inspect the lines missing coverage.
 
 ### Your own coverage tool
+To view our own DIY branch coverage tool, view the following diff:
+```
+git diff 24c4537dc74c2835eb88d36372fcf08c98c76acd^!
+```
 
-Show a patch (or link to a branch) that shows the instrumented code to
-gather coverage measurements.
-
-The patch is probably too long to be copied here, so please add
-the git command that is used to obtain the patch instead:
-
-git diff ...
-
-What kinds of constructs does your tool support, and how accurate is
-its output?
+The tool does only support simple branching structures, i.e not ternary operators or inline branches. This was a bit of a problem when measuring coverage for pythons list comprehensions and generator expressions, which are used quite a lot. But we were able to work around those limitations by manually decomposing such constructs into their expanded forms. In general the tools output was consistent with the results from `pytest-cov`.
 
 ### Evaluation
 
 1. How detailed is your coverage measurement?
+We would argue that our simple DIY tool is quite detailed in the sense that it measures on a per-function level, rather than just per-file. With proper setup the output is also quite detailed in terms of showing exactly which branches are and are not covered. However, the tool does not support more complex branching structures and also cannot report for example what tests were called to cover a specific branch.
 
 2. What are the limitations of your own tool?
+As mentioned above, the tool does not support inline branches such as ternary operators or branches inside of comprehensions. Given that these constructs are common in Python, this is a somewhat significant limitation.
 
 3. Are the results of your tool consistent with existing coverage tools?
+The results of our DIY tool are generally consistent with `pytest-cov` if you manually expand inline branching structures. However it can be noted that the DIY tool is manually orchestrated, and hence inconsistencies can arise from human error.
 
 ## Coverage improvement
 
