@@ -229,15 +229,64 @@ git diff ...
 
 Number of test cases added: two per team member (P) or at least four (P+).
 
-## Self-assessment: Way of working
+# Way of working
 
-Current state according to the Essence standard: ...
+## Principles Established
 
-Was the self-assessment unanimous? Any doubts about certain items?
+Principles and constraints are committed to by the team. ✅
 
-How have you improved so far?
+Principles and constraints are agreed to by the stakeholders. ✅
 
-Where is potential for improvement?
+The tool needs of the work and its stakeholders are agreed.  ✅
+
+A recommendation for the approach to be taken is available. ✅
+
+The context within which the team will operate is understood ✅
+
+The constraints that apply to the selection, acquisition, and use of practices and tools are
+known. ✅
+
+## Foundation Established
+
+The key practices and tools that form the foundation of the way-of-working are
+selected. ✅
+
+Enough practices for work to start are agreed to by the team. ✅
+
+All non-negotiable practices and tools have been identified. ✅
+
+The gaps that exist between the practices and tools that are needed and the practices and
+tools that are available have been analyzed and understood. ✅
+
+The capability gaps that exist between what is needed to execute the desired way of
+working and the capability levels of the team have been analyzed and understood. ✅
+
+The selected practices and tools have been integrated to form a usable way-of-working. ✅
+
+## In Use
+
+The practices and tools are being used to do real work. ✅
+
+The use of the practices and tools selected are regularly inspected. ✅
+
+The practices and tools are being adapted to the team’s context. ✅
+
+The use of the practices and tools is supported by the team. ✅
+
+Procedures are in place to handle feedback on the team’s way of working. ✅
+
+The practices and tools support team communication and collaboration. ✅
+
+## In Place
+
+The practices and tools are being used by the whole team to perform their work. ❌
+
+All team members have access to the practices and tools required to do their work. ✅
+
+The whole team is involved in the inspection and adaptation of the way-of-working. ❌
+
+
+Based on the checklist in the Essence Standard v1.2, we asses our way of working as currently completing the In Use state and starting with the In Place state, having hit 1 milestone in the in place phase. We had some issues with using the same tools in this lab, but in the end we managed to sort it out.
 
 ## Overall experience
 
