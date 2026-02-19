@@ -122,7 +122,19 @@ The quality of our own coverage measurement is quiet limited as it's very annoyi
 
 The result of the coverage analyzer was that 49/51 branches were already covered under existing test suite. Of these 3, 2 were unreachable by design so impossible to test. So I added the one test for the branch I could reach and created 3 different tests for path coverage. This was also very difficult to look at the existing test suite and try to figure out if the path had already been covered so I did my best to try and figure it out, but it's almost impossible to actually check on such a large test suite.
 
+<<<<<<< is-overlapping-branch-refactor-plan
+branch for the coverage - [`is-overlapping-test`](https://github.com/DD2480-2025-Group10/mypy-fork-assignment3/tree/is-overlapping-test)
+branch for the coverage + new testcases - [`is-overlapping-test-newcase`](https://github.com/DD2480-2025-Group10/mypy-fork-assignment3/tree/is-overlapping-test-newcase)
+
+#### Refactoring Plan
+
+This function is very hard to refactor as it's driving a lot of logic and most of the complexity comes from early return checks. But you could refactor out some of the checks into larger check modules.
+
+
+### `comparison_type_narrowing_help@mypy/checker.py`
+=======
 ### `comparison_type_narrowing_helper@mypy/checker.py`
+>>>>>>> master
 Lizard's output for `comparison_type_narrowing_helper` in `mypy/checker.py` is as follows:
 
 ```
