@@ -52,7 +52,10 @@ There are no exceptions raised in this function, so they are not taken into acco
 
 The documentation for the function is not very clear. The code is somewhat descriptive but lacks a lot of comments given its complexity and the docstring only gives a very high-level overview. I also feel that the naming of a lot of stuff may be a little to generic, there is a lot of `solve_x`.
 
-
+**Coverage Results:** Running the test suite with our DIY branch coverage tool shows that **26/26 (92.9%)** of branches are covered by tests. The missing branches are
+- Branch 1: `not vars` the function is never called with and empty set of variables.
+- Branch 27: `not strict` the function is always tested with strict mode enabled.
+For in an in detail view of the results the report can be found [here](https://github.com/DD2480-2025-Group10/mypy-fork-assignment3/pull/19/changes).
 
 ### `is_overlapping_types@mypy/meet.py`
 Lizard's output for `is_overlapping_types` in `mypy/meet.py` is as follows:
@@ -92,7 +95,7 @@ This function is both complex and fairly long. With an NLOC of 126 and total len
 
 The purpose of comparison_type_narrowing_helper() is to support mypy’s type checker by analyzing comparison expressions (such as x == y, x is y, membership checks, and chained comparisons) and determining how variable types can be narrowed based on the comparison outcome. It returns type maps describing the narrowed types for different execution branches. Because Python comparisons and type relationships are rich and varied, the function must handle many special cases, which largely explains the high complexity.
 
-There are no try/except blocks in this function, so exception handling is not taken into account in the cyclomatic complexity measurement. 
+There are no try/except blocks in this function, so exception handling is not taken into account in the cyclomatic complexity measurement.
 
 The documentation of the function gives a overview of its purpose. However, given the large number of branches and special cases, the documentation does not fully describe all possible outcomes. Understanding the exact behavior in edge cases requires reading the implementation. Additional comments would help.
 
@@ -121,7 +124,7 @@ The function lacks detailed documentation. There are no comments explaining the 
 
 **Refactoring Plan**: The function could be decomposed into separate helper methods for different return types:
 - `_check_generator_return()` for generator-specific logic
-- `_check_coroutine_return()` for coroutine handling  
+- `_check_coroutine_return()` for coroutine handling
 - `_check_typed_return()` for expression type checking
 - `_check_empty_return()` for empty return statements
 
