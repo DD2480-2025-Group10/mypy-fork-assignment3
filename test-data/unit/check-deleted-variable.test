@@ -1,0 +1,20 @@
+-- Test cases for check_simple_assignment in checker.py 
+
+
+-- 
+-- --------------------------
+
+    
+[case testAssignmentFromDeletedVariableV2]
+def f() -> None:
+    x = 1
+    del x
+    y = [x]  # E: 
+    
+
+[case testAssignmentFromDeletedVariableV4]
+def f() -> None:
+    x = 1
+    del x
+    y: int = x #E: 
+

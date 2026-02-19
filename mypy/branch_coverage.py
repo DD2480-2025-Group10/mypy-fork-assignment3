@@ -5,7 +5,10 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Final
 
-BRANCH_COVERAGE: dict[str, set[int]] = {"check_return_stmt": set()}
+BRANCH_COVERAGE: dict[str, set[int]] = {
+    "check_return_stmt": set(),
+    "check_simple_assignment": set(),
+}
 
 BRANCH_DESCRIPTIONS: Final[dict[str, dict[int, str]]] = {
     "check_return_stmt": {
@@ -42,7 +45,43 @@ BRANCH_DESCRIPTIONS: Final[dict[str, dict[int, str]]] = {
         31: "isinstance(return_type, (NoneType, AnyType)) - FALSE",
         32: "self.in_checked_function() - TRUE",
         33: "self.in_checked_function() - FALSE",
-    }
+    },
+    "check_simple_assignment": {
+        1: "Function Entry",
+        2: "is_stub - TRUE",
+        3: "is_stub - FALSE",
+        4: "isinstance(rvalue, EllipsisExpr) - TRUE",
+        5: "isinstance(rvalue, EllipsisExpr) - FALSE",
+        6: "always_allow_any: lvalue_type is not None - TRUE",
+        7: "always_allow_any: not isinstance(AnyType) - TRUE",
+        8: "inferred is None - TRUE",
+        9: "is_typeddict_type_context - TRUE",
+        10: "Inference Re-check: lvalue_type is not None - TRUE",
+        11: "Inference Re-check: type_context is None - TRUE",
+        12: "Inference Re-check: not is_valid_inferred_type - TRUE",
+        13: "Second Re-check: not is_valid_inferred_type - TRUE",
+        14: "Second Re-check: inferred is not None - TRUE",
+        15: "isinstance(lvalue, NameExpr) - TRUE",
+        16: "inferred is not None - TRUE",
+        17: "inferred.type is not None - TRUE",
+        18: "not inferred.is_final - TRUE",
+        19: "not is_same_type (Widening) - TRUE",
+        20: "not refers_to_different_scope - TRUE",
+        21: "not is_same_type (Simplified Union) - TRUE",
+        22: "not isinstance(PartialType) - TRUE",
+        23: "lit is not None (Binder update) - TRUE",
+        24: "UnionType check: isinstance Union - TRUE",
+        25: "UnionType check: not is_literal_type_like - TRUE",
+        26: "UnionType check: not simple_rvalue - TRUE",
+        27: "UnionType check: binder_version match - TRUE",
+        28: "Alt check: not local_errors.has_new_errors - TRUE",
+        29: "Alt check: not isinstance AnyType - TRUE",
+        30: "Alt check: is_valid_inferred_type - TRUE",
+        31: "Alt check: is_proper_subtype - TRUE",
+        32: "rvalue_type is DeletedType - TRUE",
+        33: "lvalue_type is DeletedType - TRUE",
+        34: "elif lvalue_type (Subtype check) - TRUE",
+    },
 }
 
 
@@ -97,3 +136,5 @@ def save_coverage_report(filename: str = "branch_coverage_report.txt") -> None:
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(report)
     print(f"\nCoverage report saved to: {output_path}")
+
+

@@ -4667,113 +4667,178 @@ class TypeChecker(NodeVisitor[None], TypeCheckerSharedApi):
         lvalue: Expression | None = None,
         inferred: Var | None = None,
     ) -> tuple[Type, Type | None]:
-        if self.is_stub and isinstance(rvalue, EllipsisExpr):
-            # '...' is always a valid initializer in a stub.
-            return AnyType(TypeOfAny.special_form), lvalue_type
-        else:
-            always_allow_any = lvalue_type is not None and not isinstance(
-                get_proper_type(lvalue_type), AnyType
-            )
-            if inferred is None or is_typeddict_type_context(lvalue_type):
-                type_context = lvalue_type
+        from mypy.branch_coverage import record_branch
+
+        record_branch("check_simple_assignment", 1)  # Function Entry
+
+        if self.is_stub:
+            record_branch("check_simple_assignment", 2)  # is_stub - TRUE
+            if isinstance(rvalue, EllipsisExpr):
+                record_branch(
+                    "check_simple_assignment", 4
+                )  # isinstance(rvalue, EllipsisExpr) - TRUE
+                # '...' is always a valid initializer in a stub.
+                return AnyType(TypeOfAny.special_form), lvalue_type
             else:
-                type_context = None
+                record_branch(
+                    "check_simple_assignment", 5
+                )  # isinstance(rvalue, EllipsisExpr) - FALSE
+                # Fall through to standard logic even in stubs if not Ellipsis
+        else:
+            record_branch("check_simple_assignment", 3)  # is_stub - FALSE
 
-            # TODO: make assignment checking correct in presence of walrus in r.h.s.
-            # Right now we can accept the r.h.s. up to four(!) times. In presence of
-            # walrus this can result in weird false negatives and "back action". A proper
-            # solution would be to:
-            #   * Refactor the code to reduce number of times we accept the r.h.s.
-            #   (two should be enough: empty context + l.h.s. context).
-            #   * For each accept use binder.accumulate_type_assignments() and assign
-            #   the types inferred for context that is ultimately used.
-            # For now we simply disable some logic that is known to cause problems in
-            # presence of walrus, see e.g. testAssignToOptionalTupleWalrus.
-            binder_version = self.binder.version
+        # --- Logic for always_allow_any ---
+        if lvalue_type is not None:
+            record_branch("check_simple_assignment", 6)
+        if not isinstance(get_proper_type(lvalue_type), AnyType):
+            record_branch("check_simple_assignment", 7)
 
+        always_allow_any = lvalue_type is not None and not isinstance(
+            get_proper_type(lvalue_type), AnyType
+        )
+
+        # --- Logic for type_context ---
+        if inferred is None:
+            record_branch("check_simple_assignment", 8)
+        if is_typeddict_type_context(lvalue_type):
+            record_branch("check_simple_assignment", 9)
+
+        if inferred is None or is_typeddict_type_context(lvalue_type):
+            type_context = lvalue_type
+        else:
+            type_context = None
+
+        binder_version = self.binder.version
+
+        rvalue_type = self.expr_checker.accept(
+            rvalue, type_context=type_context, always_allow_any=always_allow_any
+        )
+
+        # --- Inference Re-check ---
+        if lvalue_type is not None:
+            record_branch("check_simple_assignment", 10)
+        if type_context is None:
+            record_branch("check_simple_assignment", 11)
+        if not is_valid_inferred_type(rvalue_type, self.options):
+            record_branch("check_simple_assignment", 12)
+
+        if (
+            lvalue_type is not None
+            and type_context is None
+            and not is_valid_inferred_type(rvalue_type, self.options)
+        ):
             rvalue_type = self.expr_checker.accept(
-                rvalue, type_context=type_context, always_allow_any=always_allow_any
+                rvalue, type_context=lvalue_type, always_allow_any=always_allow_any
             )
-            if (
-                lvalue_type is not None
-                and type_context is None
-                and not is_valid_inferred_type(rvalue_type, self.options)
-            ):
-                # Inference in an empty type context didn't produce a valid type, so
-                # try using lvalue type as context instead.
-                rvalue_type = self.expr_checker.accept(
-                    rvalue, type_context=lvalue_type, always_allow_any=always_allow_any
+            if not is_valid_inferred_type(rvalue_type, self.options):
+                record_branch("check_simple_assignment", 13)
+            if inferred is not None:
+                record_branch("check_simple_assignment", 14)
+
+            if not is_valid_inferred_type(rvalue_type, self.options) and inferred is not None:
+                self.msg.need_annotation_for_var(inferred, context, self.options)
+                rvalue_type = rvalue_type.accept(SetNothingToAny())
+
+        # --- Widening Logic ---
+        if isinstance(lvalue, NameExpr):
+            record_branch("check_simple_assignment", 15)
+        if inferred is not None:
+            record_branch("check_simple_assignment", 16)
+        if inferred and inferred.type is not None:
+            record_branch("check_simple_assignment", 17)
+        if inferred and not inferred.is_final:
+            record_branch("check_simple_assignment", 18)
+
+        if (
+            isinstance(lvalue, NameExpr)
+            and inferred is not None
+            and inferred.type is not None
+            and not inferred.is_final
+        ):
+            new_inferred = remove_instance_last_known_values(rvalue_type)
+            if not is_same_type(inferred.type, new_inferred):
+                record_branch("check_simple_assignment", 19)
+                if not self.refers_to_different_scope(lvalue):
+                    record_branch("check_simple_assignment", 20)
+                    lvalue_type = make_simplified_union([inferred.type, new_inferred])
+
+                    if not is_same_type(lvalue_type, inferred.type):
+                        record_branch("check_simple_assignment", 21)
+                    if not isinstance(inferred.type, PartialType):
+                        record_branch("check_simple_assignment", 22)
+
+                    if not is_same_type(lvalue_type, inferred.type) and not isinstance(
+                        inferred.type, PartialType
+                    ):
+                        self.widened_vars.append(inferred.name)
+                        self.set_inferred_type(inferred, lvalue, lvalue_type)
+                        self.binder.put(lvalue, rvalue_type)
+                        lit = literal_hash(lvalue)
+                        if lit is not None:
+                            record_branch("check_simple_assignment", 23)
+                            self.binder.declarations[lit] = lvalue_type
+
+        # --- UnionType check (Complex conditional) ---
+        proper_lvalue = get_proper_type(lvalue_type)
+        if isinstance(proper_lvalue, UnionType):
+            record_branch("check_simple_assignment", 24)
+        if not is_literal_type_like(rvalue_type):
+            record_branch("check_simple_assignment", 25)
+        if not self.simple_rvalue(rvalue):
+            record_branch("check_simple_assignment", 26)
+        if binder_version == self.binder.version:
+            record_branch("check_simple_assignment", 27)
+
+        if (
+            isinstance(proper_lvalue, UnionType)
+            and not is_literal_type_like(rvalue_type)
+            and not self.simple_rvalue(rvalue)
+            and binder_version == self.binder.version
+        ):
+            with self.msg.filter_errors() as local_errors, self.local_type_map as type_map:
+                alt_rvalue_type = self.expr_checker.accept(
+                    rvalue, None, always_allow_any=always_allow_any
                 )
-                if not is_valid_inferred_type(rvalue_type, self.options) and inferred is not None:
-                    self.msg.need_annotation_for_var(inferred, context, self.options)
-                    rvalue_type = rvalue_type.accept(SetNothingToAny())
+
+            if not local_errors.has_new_errors():
+                record_branch("check_simple_assignment", 28)
+            if not isinstance(get_proper_type(alt_rvalue_type), AnyType):
+                record_branch("check_simple_assignment", 29)
+            if is_valid_inferred_type(alt_rvalue_type, self.options):
+                record_branch("check_simple_assignment", 30)
+            if is_proper_subtype(alt_rvalue_type, rvalue_type):
+                record_branch("check_simple_assignment", 31)
 
             if (
-                isinstance(lvalue, NameExpr)
-                and inferred is not None
-                and inferred.type is not None
-                and not inferred.is_final
+                not local_errors.has_new_errors()
+                and not isinstance(get_proper_type(alt_rvalue_type), AnyType)
+                and is_valid_inferred_type(alt_rvalue_type, self.options)
+                and is_proper_subtype(alt_rvalue_type, rvalue_type)
             ):
-                new_inferred = remove_instance_last_known_values(rvalue_type)
-                if not is_same_type(inferred.type, new_inferred):
-                    # Should we widen the inferred type or the lvalue? Variables defined
-                    # at module level or class bodies can't be widened in functions, or
-                    # in another module.
-                    if not self.refers_to_different_scope(lvalue):
-                        lvalue_type = make_simplified_union([inferred.type, new_inferred])
-                        if not is_same_type(lvalue_type, inferred.type) and not isinstance(
-                            inferred.type, PartialType
-                        ):
-                            # Widen the type to the union of original and new type.
-                            self.widened_vars.append(inferred.name)
-                            self.set_inferred_type(inferred, lvalue, lvalue_type)
-                            self.binder.put(lvalue, rvalue_type)
-                            # TODO: A bit hacky, maybe add a binder method that does put and
-                            #       updates declaration?
-                            lit = literal_hash(lvalue)
-                            if lit is not None:
-                                self.binder.declarations[lit] = lvalue_type
-            if (
-                isinstance(get_proper_type(lvalue_type), UnionType)
-                # Skip literal types, as they have special logic (for better errors).
-                and not is_literal_type_like(rvalue_type)
-                and not self.simple_rvalue(rvalue)
-                and binder_version == self.binder.version
-            ):
-                # Try re-inferring r.h.s. in empty context, and use that if it
-                # results in a narrower type. We don't do this always because this
-                # may cause some perf impact, plus we want to partially preserve
-                # the old behavior. This helps with various practical examples, see
-                # e.g. testOptionalTypeNarrowedByGenericCall.
-                with self.msg.filter_errors() as local_errors, self.local_type_map as type_map:
-                    alt_rvalue_type = self.expr_checker.accept(
-                        rvalue, None, always_allow_any=always_allow_any
-                    )
-                if (
-                    not local_errors.has_new_errors()
-                    # Skip Any type, since it is special cased in binder.
-                    and not isinstance(get_proper_type(alt_rvalue_type), AnyType)
-                    and is_valid_inferred_type(alt_rvalue_type, self.options)
-                    and is_proper_subtype(alt_rvalue_type, rvalue_type)
-                ):
-                    rvalue_type = alt_rvalue_type
-                    self.store_types(type_map)
-            if isinstance(rvalue_type, DeletedType):
-                self.msg.deleted_as_rvalue(rvalue_type, context)
-            if isinstance(lvalue_type, DeletedType):
-                self.msg.deleted_as_lvalue(lvalue_type, context)
-            elif lvalue_type:
-                self.check_subtype(
-                    # Preserve original aliases for error messages when possible.
-                    rvalue_type,
-                    lvalue_type,
-                    context,
-                    msg,
-                    f"{rvalue_name} has type",
-                    f"{lvalue_name} has type",
-                    notes=notes,
-                )
-            return rvalue_type, lvalue_type
+                rvalue_type = alt_rvalue_type
+                self.store_types(type_map)
+
+        # --- Final DeletedType and Subtype Checks ---
+        if isinstance(rvalue_type, DeletedType):
+            record_branch("check_simple_assignment", 32)
+            raise AssertionError("DeletedType reached in check_simple_assignment")
+
+        if isinstance(lvalue_type, DeletedType):
+            record_branch("check_simple_assignment", 33)
+            self.msg.deleted_as_lvalue(lvalue_type, context)
+        elif lvalue_type:
+            record_branch("check_simple_assignment", 34)
+            self.check_subtype(
+                rvalue_type,
+                lvalue_type,
+                context,
+                msg,
+                f"{rvalue_name} has type",
+                f"{lvalue_name} has type",
+                notes=notes,
+            )
+
+        return rvalue_type, lvalue_type
 
     def refers_to_different_scope(self, name: NameExpr) -> bool:
         if name.kind == LDEF:
