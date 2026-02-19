@@ -122,6 +122,7 @@ The quality of our own coverage measurement is quiet limited as it's very annoyi
 
 The result of the coverage analyzer was that 49/51 branches were already covered under existing test suite. Of these 3, 2 were unreachable by design so impossible to test. So I added the one test for the branch I could reach and created 3 different tests for path coverage. This was also very difficult to look at the existing test suite and try to figure out if the path had already been covered so I did my best to try and figure it out, but it's almost impossible to actually check on such a large test suite.
 
+<<<<<<< is-overlapping-branch-refactor-plan
 branch for the coverage - [`is-overlapping-test`](https://github.com/DD2480-2025-Group10/mypy-fork-assignment3/tree/is-overlapping-test)
 branch for the coverage + new testcases - [`is-overlapping-test-newcase`](https://github.com/DD2480-2025-Group10/mypy-fork-assignment3/tree/is-overlapping-test-newcase)
 
@@ -131,6 +132,9 @@ This function is very hard to refactor as it's driving a lot of logic and most o
 
 
 ### `comparison_type_narrowing_help@mypy/checker.py`
+=======
+### `comparison_type_narrowing_helper@mypy/checker.py`
+>>>>>>> master
 Lizard's output for `comparison_type_narrowing_helper` in `mypy/checker.py` is as follows:
 
 ```
@@ -151,7 +155,19 @@ There are no try/except blocks in this function, so exception handling is not ta
 
 The documentation of the function gives a overview of its purpose. However, given the large number of branches and special cases, the documentation does not fully describe all possible outcomes. Understanding the exact behavior in edge cases requires reading the implementation. Additional comments would help.
 
+**Coverage Results**: Running the test suite with our DIY branch coverage tool shows that **13/14 (92.9%)** of branches are covered by tests. The missing branches are
+- Branch 2: `not self.has_type`: This branch is unreachable by design because it requires the comparison expression not having a type which will result in errors from mypy's type checking. It functions as defensive code if any upstream code would be wrong. This is probably why this branch isn't tested.
+
 The result of the coverage analysis for comparison_type_narrowing_helper() showed that most branches (13/14) were already exercised by the existing mypy test suite. However, Branch 2 was determined to be unreachable by design, making it impossible to cover through additional tests. I then chose to think about path coverage. To improve coverage, I therefore added two additional tests focused on path coverage, ensuring that different combinations of comparison and membership logic are exercised. Identifying whether particular paths were already covered was challenging due to the size and complexity of the existing test suite.
+
+**Refactoring Plan**: The function comparison_type_narrowing_helper() could be seperated into different helper functions that handle different operators cases:
+- `_handle_identity_equality()` — logic for is, is not, ==, != 
+- `_handle_membership_comparison()` — logic for in and not in 
+- `_apply_optional_narrowing()` — removes None from Optional types when safe 
+- `_swap_maps_for_negative_comparison()` — handles negative comparison cases 
+- `_fallback_len_narrowing()` — fallback narrowing logic
+
+This would help a lot with readbility of the function aswell as hopefully after refactoring, each helper will have around 5-8 complexity instead of 30.
 
 ### `check_return_stmt@mypy/checker.py`
 Lizard's output for `check_return_stmt` in `mypy/checker.py` is as follows:
@@ -237,15 +253,64 @@ git diff ...
 
 Number of test cases added: two per team member (P) or at least four (P+).
 
-## Self-assessment: Way of working
+# Way of working
 
-Current state according to the Essence standard: ...
+## Principles Established
 
-Was the self-assessment unanimous? Any doubts about certain items?
+Principles and constraints are committed to by the team. ✅
 
-How have you improved so far?
+Principles and constraints are agreed to by the stakeholders. ✅
 
-Where is potential for improvement?
+The tool needs of the work and its stakeholders are agreed.  ✅
+
+A recommendation for the approach to be taken is available. ✅
+
+The context within which the team will operate is understood ✅
+
+The constraints that apply to the selection, acquisition, and use of practices and tools are
+known. ✅
+
+## Foundation Established
+
+The key practices and tools that form the foundation of the way-of-working are
+selected. ✅
+
+Enough practices for work to start are agreed to by the team. ✅
+
+All non-negotiable practices and tools have been identified. ✅
+
+The gaps that exist between the practices and tools that are needed and the practices and
+tools that are available have been analyzed and understood. ✅
+
+The capability gaps that exist between what is needed to execute the desired way of
+working and the capability levels of the team have been analyzed and understood. ✅
+
+The selected practices and tools have been integrated to form a usable way-of-working. ✅
+
+## In Use
+
+The practices and tools are being used to do real work. ✅
+
+The use of the practices and tools selected are regularly inspected. ✅
+
+The practices and tools are being adapted to the team’s context. ✅
+
+The use of the practices and tools is supported by the team. ✅
+
+Procedures are in place to handle feedback on the team’s way of working. ✅
+
+The practices and tools support team communication and collaboration. ✅
+
+## In Place
+
+The practices and tools are being used by the whole team to perform their work. ❌
+
+All team members have access to the practices and tools required to do their work. ✅
+
+The whole team is involved in the inspection and adaptation of the way-of-working. ❌
+
+
+Based on the checklist in the Essence Standard v1.2, we asses our way of working as currently completing the In Use state and starting with the In Place state, having hit 1 milestone in the in place phase. We had some issues with using the same tools in this lab, but in the end we managed to sort it out.
 
 ## Overall experience
 
