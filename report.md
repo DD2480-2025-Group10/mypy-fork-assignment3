@@ -197,6 +197,8 @@ branch for the coverage - [`check-return-stmt_original`](https://github.com/DD24
 branch for the coverage + new testcases - [`check-return-stmt_test`](https://github.com/DD2480-2025-Group10/mypy-fork-assignment3/tree/check-return-stmt_test)
 
 ### `check_simple_assignment@mypy/checker.py`
+This function handles the logic for assignments. It tries to make sure that the assignment is allowed based on the types of the left hand side and right hand side. 
+The function had decent documentation, but not much in the way of comments. The bulk of comments on the function were TODO, which partially did explain how the function worked, but in a slightly confusing way.
 Lizard's output for `check_simple_assignment` in `mypy/checker.py` is as follows:
 ```
   NLOC    CCN   token  PARAM  length  location
@@ -216,12 +218,12 @@ $$31 - 2 + 2 = \mathbf{31}$$
 
 This calculation perfectly aligns with Lizard's reported CCN of **31**.
 
-This function is a critical component of the Mypy type checker, responsible for validating assignment compatibility. It currently manages several responsibilities:
+As said this function is a critical component of the Mypy type checker, responsible for validating assignment compatibility. It currently manages several responsibilities:
 * **Stub Handling:** Special logic for `.pyi` files and ellipsis.
 * **Context Discovery:** Deciding if the `lvalue` should inform the `rvalue` type inference.
 * **Type Widening:** Updating the binder when assignments suggest a broader union type.
 * **Narrowing Logic:** Re-inferring expressions to find more specific types.
-The function had decent documentation, but not much in the way of comments. The bulk of comments on the function were TODO, which partially did explain how the function worked, but in a slightly confusing way.
+
 ### Refactoring Plan
 To reduce the complexity, the function should be seperated into specific handlers:
 
@@ -239,14 +241,14 @@ The Coverage from the MyPy tests reached every branch except one, this one:
  if isinstance(rvalue_type, DeletedType):
                 self.msg.deleted_as_rvalue(rvalue_type, context)
  ```
- We were able to hit this with the test:
+ We thought at first that this branch was impossible to hit, since MyPy handles the deleted type as an internal type. It gets handled as an "AnyType" in most cases. We were able to hit this with the test:
  ```
  def f() -> None:
     x = 1
     del x
     y: int = x 
 ```
-With this we reached 100 percent branch coverage. The explicit type hint (: int) forces Mypy to invoke check_simple_assignment to ensure the rvalue matches the declared lvalue. Because the semantic analyzer failed to block the use of the deleted x, the function received a DeletedType as an input
+With this we reached 100 percent branch coverage. The explicit type hint (: int) forces Mypy to invoke check_simple_assignment to ensure the rvalue matches the declared lvalue. Because the semantic analyzer failed to block the use of the deleted x, the function received a DeletedType as an input. 
 Since we reached 100 percent branch coverage with this test, we wrote other tests to cover other paths we thought to be unreached by existing MyPy tests. 
 [Tests](https://github.com/DD2480-2025-Group10/mypy-fork-assignment3/blob/26-add-tests-for-path-coverage-for-check_simple_assignment-/test-data/unit/check-deleted-variable.test)
 ## Coverage
