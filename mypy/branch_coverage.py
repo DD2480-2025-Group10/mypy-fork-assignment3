@@ -5,7 +5,10 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Final
 
-BRANCH_COVERAGE: dict[str, set[int]] = {"check_return_stmt": set()}
+BRANCH_COVERAGE: dict[str, set[int]] = {
+    "check_return_stmt": set(),
+    "solve_constraints": set(),
+}
 
 BRANCH_DESCRIPTIONS: Final[dict[str, dict[int, str]]] = {
     "check_return_stmt": {
@@ -42,6 +45,36 @@ BRANCH_DESCRIPTIONS: Final[dict[str, dict[int, str]]] = {
         31: "isinstance(return_type, (NoneType, AnyType)) - FALSE",
         32: "self.in_checked_function() - TRUE",
         33: "self.in_checked_function() - FALSE",
+    },
+    "solve_constraints": {
+        1: "not vars - TRUE",
+        2: "tv in original_vars",
+        3: "c in constraints",
+        4: "v in c.extra_vars (1)",
+        5: "v.id not in vars + extra_vars",
+        6: "v in c.extra_tvars (2)",
+        7: "v.id not in originals",
+        8: "allow_polymorphic - TRUE (1)",
+        9: "tv in vars + extra_vars",
+        10: "con in constraints",
+        11: "con.type_var in vars + extra_vars",
+        12: "allow_polymorphic - TRUE (2)",
+        13: "constraints - TRUE",
+        14: "constraints - FALSE",
+        15: "allow_polymorphic - FALSE (2)",
+        16: "tv, cs in cmap.items()",
+        17: "not cs - TRUE",
+        18: "c in cs (1)",
+        19: "c.op == SUPERTYPE_OF - TRUE",
+        20: "c in cs (2)",
+        21: "c.op == SUBTYPE_OF - TRUE",
+        22: "solution is None or not get_vars(...) - TRUE",
+        23: "v in vars",
+        24: "v in solutions - TRUE",
+        25: "v in solutions - FALSE",
+        26: "strict - TRUE",
+        27: "strict - FALSE",
+        28: "not free_vars and not skip_uninhabited - TRUE",
     }
 }
 

@@ -45,6 +45,7 @@ def solve_constraints(
     allow_polymorphic: bool = False,
     skip_unsatisfied: bool = False,
 ) -> tuple[list[Type | None], list[TypeVarLikeType]]:
+    from mypy.branch_coverage import record_branch
     """Solve type constraints.
 
     Return the best type(s) for type variables; each type can be None if the value of
@@ -60,64 +61,115 @@ def solve_constraints(
     """
     vars = [tv.id for tv in original_vars]
     if not vars:
+        record_branch("solve_constraints", 1)
         return [], []
 
-    originals = {tv.id: tv for tv in original_vars}
+    originals = {}
+    for tv in original_vars:
+        record_branch("solve_constraints", 2)
+        originals[tv.id] = tv
+
     extra_vars: list[TypeVarId] = []
     # Get additional type variables from generic actuals.
     for c in constraints:
-        extra_vars.extend([v.id for v in c.extra_tvars if v.id not in vars + extra_vars])
-        originals.update({v.id: v for v in c.extra_tvars if v.id not in originals})
+        record_branch("solve_constraints", 3)
+        for v in c.extra_tvars:
+            record_branch("solve_constraints", 4)
+            if v.id not in vars + extra_vars:
+                record_branch("solve_constraints", 5)
+                extra_vars.append(v.id)
+        # extra_vars.extend([v.id for v in c.extra_tvars if v.id not in vars + extra_vars])
+        for v in c.extra_tvars:
+            record_branch("solve_constraints", 6)
+            if v.id not in originals:
+                record_branch("solve_constraints", 7)
+                originals[v.id] = v
+
+        #originals.update({v.id: v for v in c.extra_tvars if v.id not in originals})
 
     if allow_polymorphic:
+        record_branch("solve_constraints", 8)
         # Constraints inferred from unions require special handling in polymorphic inference.
         constraints = skip_reverse_union_constraints(constraints)
 
     # Collect a list of constraints for each type variable.
-    cmap: dict[TypeVarId, list[Constraint]] = {tv: [] for tv in vars + extra_vars}
+    cmap: dict[TypeVarId, list[Constraint]] = {}
+    for tv in vars + extra_vars:
+        record_branch("solve_constraints", 9)
+        cmap[tv] = []
+
     for con in constraints:
+        record_branch("solve_constraints", 10)
         if con.type_var in vars + extra_vars:
+            record_branch("solve_constraints", 11)
             cmap[con.type_var].append(con)
 
     if allow_polymorphic:
+        record_branch("solve_constraints", 12)
         if constraints:
+            record_branch("solve_constraints", 13)
             solutions, free_vars = solve_with_dependent(
                 vars + extra_vars, constraints, vars, originals
             )
         else:
+            record_branch("solve_constraints", 14)
             solutions = {}
             free_vars = []
     else:
+        record_branch("solve_constraints", 15)
         solutions = {}
         free_vars = []
         for tv, cs in cmap.items():
+            record_branch("solve_constraints", 16)
             if not cs:
+                record_branch("solve_constraints", 17)
                 continue
-            lowers = [c.target for c in cs if c.op == SUPERTYPE_OF]
-            uppers = [c.target for c in cs if c.op == SUBTYPE_OF]
+
+            lowers = []
+            uppers = []
+            for c in cs:
+                record_branch("solve_constraints", 18)
+                if c.op == SUPERTYPE_OF:
+                    record_branch("solve_constraints", 19)
+                    lowers.append(c.target)
+
+            for c in cs:
+                record_branch("solve_constraints", 20)
+                if c.op == SUBTYPE_OF:
+                    record_branch("solve_constraints", 21)
+                    uppers.append(c.target)
+            #lowers = [c.target for c in cs if c.op == SUPERTYPE_OF]
+            #uppers = [c.target for c in cs if c.op == SUBTYPE_OF]
             solution = solve_one(lowers, uppers)
 
             # Do not leak type variables in non-polymorphic solutions.
             if solution is None or not get_vars(
                 solution, [tv for tv in extra_vars if tv not in vars]
             ):
+                record_branch("solve_constraints", 22)
                 solutions[tv] = solution
 
     res: list[Type | None] = []
     for v in vars:
+        record_branch("solve_constraints", 23)
         if v in solutions:
+            record_branch("solve_constraints", 24)
             res.append(solutions[v])
         else:
+            record_branch("solve_constraints", 25)
             # No constraints for type variable -- 'UninhabitedType' is the most specific type.
             candidate: Type
             if strict:
+                record_branch("solve_constraints", 26)
                 candidate = UninhabitedType()
                 candidate.ambiguous = True
             else:
+                record_branch("solve_constraints", 27)
                 candidate = AnyType(TypeOfAny.special_form)
             res.append(candidate)
 
     if not free_vars and not skip_unsatisfied:
+        record_branch("solve_constraints", 28)
         # Most of the validation for solutions is done in applytype.py, but here we can
         # quickly test solutions w.r.t. to upper bounds, and use the latter (if possible),
         # if solutions are actually not valid (due to poor inference context).

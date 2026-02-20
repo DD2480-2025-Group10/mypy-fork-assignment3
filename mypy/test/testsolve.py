@@ -6,7 +6,7 @@ from mypy.constraints import SUBTYPE_OF, SUPERTYPE_OF, Constraint
 from mypy.solve import Bounds, Graph, solve_constraints, transitive_closure
 from mypy.test.helpers import Suite, assert_equal
 from mypy.test.typefixture import TypeFixture
-from mypy.types import Type, TypeVarId, TypeVarLikeType, TypeVarType
+from mypy.types import AnyType, Type, TypeOfAny, TypeVarId, TypeVarLikeType, TypeVarType, UninhabitedType
 
 
 class SolveSuite(Suite):
@@ -247,6 +247,23 @@ class SolveSuite(Suite):
             {self.fx.t.id: set(), self.fx.s.id: {self.fx.gt}},
             {self.fx.t.id: {self.fx.a}, self.fx.s.id: {self.fx.ga}},
         )
+
+    def test_no_input_variables(self) -> None:
+        # Tests that output is empty when there are no input variables, even if there are constraints.
+        self.assert_solve([], [self.supc(self.fx.t, self.fx.a)], [])
+
+    def test_no_constraints_non_strict_solution(self) -> None:
+        # A variable with no constraints should give an unihabited type for strict=True,
+        # but for strict=False, we should get Any.
+        vars = [self.fx.t]
+        constraints = []
+        results = [AnyType(TypeOfAny.special_form)]
+
+        actual, actual_free = solve_constraints(
+            vars, constraints, allow_polymorphic=False, strict=False, skip_unsatisfied=True
+        )
+        assert_equal(actual, results)
+        assert_equal(actual_free, [])
 
     def assert_solve(
         self,
