@@ -81,9 +81,9 @@ UNCOVERED BRANCHES:
 ================================================================================
 Function: solve_constraints
 ================================================================================
-Coverage: 26/28 branches (92.9%)
+Coverage: 28/28 branches (100.0%)
 
-  Branch  1: NOT COVERED     | not vars - TRUE
+  Branch  1: COVERED         | not vars - TRUE
   Branch  2: COVERED         | tv in original_vars
   Branch  3: COVERED         | c in constraints
   Branch  4: COVERED         | v in c.extra_vars (1)
@@ -109,13 +109,11 @@ Coverage: 26/28 branches (92.9%)
   Branch 24: COVERED         | v in solutions - TRUE
   Branch 25: COVERED         | v in solutions - FALSE
   Branch 26: COVERED         | strict - TRUE
-  Branch 27: NOT COVERED     | strict - FALSE
+  Branch 27: COVERED         | strict - FALSE
   Branch 28: COVERED         | not free_vars and not skip_uninhabited - TRUE
 
 ================================================================================
 UNCOVERED BRANCHES:
 ================================================================================
-  Branch  1: not vars - TRUE
-  Branch 27: strict - FALSE
 
 ================================================================================
