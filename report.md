@@ -6,23 +6,19 @@ has to be delivered in a standard, cross-platform format.
 
 ## Project
 
-Name:
+Name: mypy
+URL: https://github.com/python/mypy
 
-URL:
-
-One or two sentences describing it
+Mypy is an open-source static type checker for Python.
 
 ## Onboarding experience
 
-Did it build and run as documented?
+The onboarding experience with mypy was quite smooth. The documentation for how to set up and run the project and tests was good and easy to follow.
 
-See the assignment for details; if everything works out of the box,
-there is no need to write much here. If the first project(s) you picked
-ended up being unsuitable, you can describe the "onboarding experience"
-for each project, along with reason(s) why you changed to a different one.
+As a note on this point, the fact that it was so easy turned out to be a bit of a problem since created a false sense of confidence in the choice of project. As it turned out, the project is also already quite well covered by tests, and the code is at times very complex and domain specific which made it quite difficult to find good targets for refactoring and testing.
 
-
-## Complexity
+## Complexity, Refactoring and Coverage
+**Each team member has added at least two test cases for (P)**
 
 ### `solve_constraints@mypy/solve.py`
 Lizard's output for `solve_constraints` in `mypy/solve.py` is as follows:
@@ -197,16 +193,6 @@ This would reduce CC from 33 to approximately 5-8 per function, improving readab
 
 After adding 4 new test cases targeting uncovered branches, coverage improved to **31/33 (93.9%)**. Branch 28 was successfully covered, but Branch 33 remains difficult to trigger due to mypy's type inference behavior (unannotated functions typically infer `None` or `Any`, bypassing this branch).
 
-## Refactoring
-
-Plan for refactoring complex code:
-
-Estimated impact of refactoring (lower CC, but other drawbacks?).
-
-Carried out refactoring (optional, P+):
-
-git diff ...
-
 ## Coverage
 
 ### Tools
@@ -230,20 +216,6 @@ As mentioned above, the tool does not support inline branches such as ternary op
 
 3. Are the results of your tool consistent with existing coverage tools?
 The results of our DIY tool are generally consistent with `pytest-cov` if you manually expand inline branching structures. However it can be noted that the DIY tool is manually orchestrated, and hence inconsistencies can arise from human error.
-
-## Coverage improvement
-
-Show the comments that describe the requirements for the coverage.
-
-Report of old coverage: [link]
-
-Report of new coverage: [link]
-
-Test cases added:
-
-git diff ...
-
-Number of test cases added: two per team member (P) or at least four (P+).
 
 # Way of working
 
