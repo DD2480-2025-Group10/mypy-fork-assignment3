@@ -24,14 +24,6 @@ for each project, along with reason(s) why you changed to a different one.
 
 ## Complexity
 
-1. What are your results for five complex functions?
-   * Did all methods (tools vs. manual count) get the same result?
-   * Are the results clear?
-2. Are the functions just complex, or also long?
-3. What is the purpose of the functions?
-4. Are exceptions taken into account in the given measurements?
-5. Is the documentation clear w.r.t. all the possible outcomes?
-
 ### `solve_constraints@mypy/solve.py`
 Lizard's output for `solve_constraints` in `mypy/solve.py` is as follows:
 ```
@@ -55,7 +47,8 @@ The documentation for the function is not very clear. The code is somewhat descr
 **Coverage Results:** Running the test suite with our DIY branch coverage tool shows that **26/26 (92.9%)** of branches are covered by tests. The missing branches are
 - Branch 1: `not vars` the function is never called with and empty set of variables.
 - Branch 27: `not strict` the function is always tested with strict mode enabled.
-For in an in detail view of the results the report can be found [here](https://github.com/DD2480-2025-Group10/mypy-fork-assignment3/pull/19/changes).
+
+For in an in detail view of the results the report can be found [here](https://github.com/DD2480-2025-Group10/mypy-fork-assignment3/pull/19/changes). The pr contains three commits, showing the coverage before and after adding new test cases.
 
 #### Refactoring Plan
 In order to refactor a function like this, I would first try to identify what is wrong with the current structure, and how impactful the refactoring would be. In this case I begin by noticing that the functions external dependencies are quite few:
@@ -160,10 +153,10 @@ branch for the coverage - [`comparison-type-narrowing-helper-instrumentation`](h
 branch for the coverage + new testcases - [`comparison_type_narrowing_helper_tests`](https://github.com/DD2480-2025-Group10/mypy-fork-assignment3/tree/comparison_type_narrowing_helper_tests)
 
 **Refactoring Plan**: The function comparison_type_narrowing_helper() could be seperated into different helper functions that handle different operators cases:
-- `_handle_identity_equality()` — logic for is, is not, ==, != 
-- `_handle_membership_comparison()` — logic for in and not in 
-- `_apply_optional_narrowing()` — removes None from Optional types when safe 
-- `_swap_maps_for_negative_comparison()` — handles negative comparison cases 
+- `_handle_identity_equality()` — logic for is, is not, ==, !=
+- `_handle_membership_comparison()` — logic for in and not in
+- `_apply_optional_narrowing()` — removes None from Optional types when safe
+- `_swap_maps_for_negative_comparison()` — handles negative comparison cases
 - `_fallback_len_narrowing()` — fallback narrowing logic
 
 This would help a lot with readbility of the function aswell as hopefully after refactoring, each helper will have around 5-8 complexity instead of 30.
