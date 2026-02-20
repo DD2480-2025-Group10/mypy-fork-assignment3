@@ -5,16 +5,25 @@
 -- --------------------------
 
     
-[case testAssignmentFromDeletedVariableV2]
+[case testAssignmentToListFromDeleted]
 def f() -> None:
     x = 1
     del x
-    y = [x]  # E: 
-    
+    y = [x]  # E:
 
-[case testAssignmentFromDeletedVariableV4]
+[case testTypedAssignmentFromDeleted]
 def f() -> None:
     x = 1
     del x
-    y: int = x #E: 
-
+    y: int = x # E:
+[case testRedundantDeletion]
+def f() -> None:
+    x = 1
+    del x
+    del x
+[case testSequentialAssignmentFromDeleted]
+def f() -> None:
+    x = 1
+    del x
+    y: int = x # E: 
+    y = x
