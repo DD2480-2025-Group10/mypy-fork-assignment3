@@ -1,0 +1,51 @@
+================================================================================
+BRANCH COVERAGE REPORT
+================================================================================
+
+================================================================================
+Function: check_return_stmt
+================================================================================
+Coverage: 30/33 branches (90.9%)
+
+  Branch  1: COVERED         | Function entry
+  Branch  2: COVERED         | defn is not None - TRUE
+  Branch  3: NOT COVERED     | defn is not None - FALSE
+  Branch  4: COVERED         | defn.is_generator - TRUE
+  Branch  5: COVERED         | defn.is_generator - FALSE (else/elif)
+  Branch  6: COVERED         | defn.is_coroutine - TRUE
+  Branch  7: COVERED         | defn.is_coroutine - FALSE (else)
+  Branch  8: COVERED         | isinstance(return_type, UninhabitedType) - TRUE
+  Branch  9: COVERED         | isinstance(return_type, UninhabitedType) - FALSE
+  Branch 10: COVERED         | not is_lambda and not return_type.ambiguous - TRUE
+  Branch 11: COVERED         | not is_lambda and not return_type.ambiguous - FALSE
+  Branch 12: COVERED         | s.expr - TRUE (has return value)
+  Branch 13: COVERED         | s.expr - FALSE (empty return)
+  Branch 14: COVERED         | isinstance(s.expr, (CallExpr, ...)) or isinstance(s.expr, AwaitExpr) - TRUE
+  Branch 15: COVERED         | isinstance(s.expr, (CallExpr, ...)) or isinstance(s.expr, AwaitExpr) - FALSE
+  Branch 16: COVERED         | isinstance(typ, Instance) and typ.type.fullname in NOT_IMPLEMENTED - TRUE
+  Branch 17: COVERED         | isinstance(typ, Instance) and typ.type.fullname in NOT_IMPLEMENTED - FALSE
+  Branch 18: COVERED         | defn.is_async_generator - TRUE
+  Branch 19: COVERED         | defn.is_async_generator - FALSE
+  Branch 20: COVERED         | isinstance(typ, AnyType) - TRUE
+  Branch 21: COVERED         | isinstance(typ, AnyType) - FALSE
+  Branch 22: COVERED         | warn_return_any conditions - TRUE (all conditions met)
+  Branch 23: COVERED         | warn_return_any conditions - FALSE (at least one condition not met)
+  Branch 24: COVERED         | declared_none_return - TRUE
+  Branch 25: COVERED         | declared_none_return - FALSE
+  Branch 26: COVERED         | is_lambda or isinstance(typ, NoneType) - TRUE
+  Branch 27: COVERED         | is_lambda or isinstance(typ, NoneType) - FALSE
+  Branch 28: NOT COVERED     | defn.is_generator and not defn.is_coroutine and isinstance(return_type, AnyType) - TRUE
+  Branch 29: COVERED         | defn.is_generator and not defn.is_coroutine and isinstance(return_type, AnyType) - FALSE
+  Branch 30: COVERED         | isinstance(return_type, (NoneType, AnyType)) - TRUE
+  Branch 31: COVERED         | isinstance(return_type, (NoneType, AnyType)) - FALSE
+  Branch 32: COVERED         | self.in_checked_function() - TRUE
+  Branch 33: NOT COVERED     | self.in_checked_function() - FALSE
+
+================================================================================
+UNCOVERED BRANCHES:
+================================================================================
+  Branch  3: defn is not None - FALSE
+  Branch 28: defn.is_generator and not defn.is_coroutine and isinstance(return_type, AnyType) - TRUE
+  Branch 33: self.in_checked_function() - FALSE
+
+================================================================================
