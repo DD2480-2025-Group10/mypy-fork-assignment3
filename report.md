@@ -193,6 +193,10 @@ This would reduce CC from 33 to approximately 5-8 per function, improving readab
 
 After adding 4 new test cases targeting uncovered branches, coverage improved to **31/33 (93.9%)**. Branch 28 was successfully covered, but Branch 33 remains difficult to trigger due to mypy's type inference behavior (unannotated functions typically infer `None` or `Any`, bypassing this branch).
 
+branch for the coverage - [`check-return-stmt_original`](https://github.com/DD2480-2025-Group10/mypy-fork-assignment3/tree/check-return-stmt_original)
+branch for the coverage + new testcases - [`check-return-stmt_test`](https://github.com/DD2480-2025-Group10/mypy-fork-assignment3/tree/check-return-stmt_test)
+
+
 ## Coverage
 
 ### Tools
