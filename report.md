@@ -248,7 +248,7 @@ The Coverage from the MyPy tests reached every branch except one, this one:
 ```
 With this we reached 100 percent branch coverage. The explicit type hint (: int) forces Mypy to invoke check_simple_assignment to ensure the rvalue matches the declared lvalue. Because the semantic analyzer failed to block the use of the deleted x, the function received a DeletedType as an input
 Since we reached 100 percent branch coverage with this test, we wrote other tests to cover other paths we thought to be unreached by existing MyPy tests. 
-[Tests](test-data/unit/check-deleted-variable.test)
+[Tests](https://github.com/DD2480-2025-Group10/mypy-fork-assignment3/blob/26-add-tests-for-path-coverage-for-check_simple_assignment-/test-data/unit/check-deleted-variable.test)
 ## Coverage
 
 ### Tools
