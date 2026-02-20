@@ -333,7 +333,4 @@ The whole team is involved in the inspection and adaptation of the way-of-workin
 Based on the checklist in the Essence Standard v1.2, we asses our way of working as currently completing the In Use state and starting with the In Place state, having hit 1 milestone in the in place phase. We had some issues with using the same tools in this lab, but in the end we managed to sort it out.
 
 ## Overall experience
-
-What are your main take-aways from this project? What did you learn?
-
-Is there something special you want to mention here?
+One thing we learned was that the difficulty of refactoring a function isn't nesescarilly based on the cyclomatic complexity of that function. It was easier to come up with a plan to refactor certain functions, even though their CC was about the same. We also learned that picking functions with high CC was a poor choice for this task. We struggled more than we should have with this task because of our choice of project(MyPy) and our choices of functions. The clarification on canvas to choose simpler function came too late for us to make a change, so we think a short mention in the assignment description of how one could think of choosing a repo and function would be helpful for future students. 
