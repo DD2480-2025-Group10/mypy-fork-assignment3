@@ -196,7 +196,59 @@ After adding 4 new test cases targeting uncovered branches, coverage improved to
 branch for the coverage - [`check-return-stmt_original`](https://github.com/DD2480-2025-Group10/mypy-fork-assignment3/tree/check-return-stmt_original)
 branch for the coverage + new testcases - [`check-return-stmt_test`](https://github.com/DD2480-2025-Group10/mypy-fork-assignment3/tree/check-return-stmt_test)
 
+### `check_simple_assignment@mypy/checker.py`
+Lizard's output for `check_simple_assignment` in `mypy/checker.py` is as follows:
+```
+  NLOC    CCN   token  PARAM  length  location
+------------------------------------------------
+ 90     31    559     10     120 check_simple_assignment@4657-4776@mypy/checker.py
 
+
+```
+
+To verify the structural complexity, we performed a manual count of the decision points ($\pi$) and exit points ($s$). Using the formal Cyclomatic Complexity formula:
+
+$$CC = \pi - s + 2$$
+
+With **31 decision points** (including all `if`, `elif`, and logical `and`/`or` operators) and **2 exit points** (the early stub return and the final function return), the calculation is:
+
+$$31 - 2 + 2 = \mathbf{31}$$
+
+This calculation perfectly aligns with Lizard's reported CCN of **31**.
+
+This function is a critical component of the Mypy type checker, responsible for validating assignment compatibility. It currently manages several distinct responsibilities:
+* **Stub Handling:** Special logic for `.pyi` files and ellipsis.
+* **Context Discovery:** Deciding if the `lvalue` should inform the `rvalue` type inference.
+* **Type Widening:** Updating the binder when assignments suggest a broader union type.
+* **Narrowing Logic:** Re-inferring expressions to find more specific types.
+
+### Refactoring Plan
+To reduce the complexity to a manageable level, the function should be decomposed into specific handlers:
+
+1.  **Extract Stub Handler:** Move the initial `is_stub` check to a helper method, allowing the main function to focus on standard assignment logic.
+2.  **Extract Inferred Type Logic:** Move the multi-stage `expr_checker.accept` logic into a dedicated inference method.
+3.  **Extract Widening Logic:** Encapsulate the complex `Union` widening and `binder.put` logic into a separate method.
+4.  **Extract Narrowing/Union Logic:** Move the conditional narrowing involving `filter_errors` into its own helper.
+
+By extracting these components, the main `check_simple_assignment` would serve as a high-level coordinator, significantly lowering its CC and making the flow easier to audit.
+
+### Coverage 
+The Coverage from the MyPy tests reached every branch except one, this one:
+```
+
+ if isinstance(rvalue_type, DeletedType):
+                self.msg.deleted_as_rvalue(rvalue_type, context)
+ ```
+ We we able to hit this with the test:
+ ```
+ def f() -> None:
+    x = 1
+    del x
+    y: int = x 
+```
+With this we reached 100 percent branch coverage. The explicit type hint (: int) forces Mypy to invoke check_simple_assignment to ensure the rvalue matches the declared lvalue. Because the semantic analyzer failed to block the use of the deleted x, the function received a DeletedType as an input
+Since we reached 100 percent branch coverage with this test, we wrote other tests to cover other paths we thought to be unreached by existing MyPy tests. 
+[Tests](test-data/unit/check-deleted-variable.test)
 ## Coverage
 
 ### Tools
